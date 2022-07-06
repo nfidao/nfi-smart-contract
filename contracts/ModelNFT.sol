@@ -3,7 +3,6 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./lib/ERC721A.sol";
@@ -12,8 +11,7 @@ import "./lib/ERC721A.sol";
 contract ModelNFT is
     ERC721A,
     ERC2981,
-    AccessControlEnumerable, 
-    Ownable
+    AccessControlEnumerable
 {
     using Counters for Counters.Counter;
 
@@ -27,14 +25,14 @@ contract ModelNFT is
         string memory symbol,
         uint256 limit, 
         uint96 rate, 
-        address owner,
+        address designer,
         address payable royaltyReceiver
     )
         ERC721A(name, symbol)        
     {
         mintLimit = limit;
         _setDefaultRoyalty(royaltyReceiver, rate);
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(DEFAULT_ADMIN_ROLE, designer);
     }
 
     /**
@@ -87,12 +85,12 @@ contract ModelNFT is
     /**
     @notice Sets the contract-wide royalty info.
      */
-    function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
-        external
-        onlyOwner
-    {
-        _setDefaultRoyalty(receiver, feeBasisPoints);
-    }
+    // function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
+    //     external
+    //     onlyOwner
+    // {
+    //     _setDefaultRoyalty(receiver, feeBasisPoints);
+    // }
 
     function supportsInterface(bytes4 interfaceId)
         public

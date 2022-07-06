@@ -9,7 +9,7 @@ contract ModelNFTFactory is Ownable {
     ModelNFT private modelNFT;
 
     // Array of created model NFTs 
-    ModelNFT[] public modelNFTArray;
+    // ModelNFT[] public modelNFTArray;
 
     // Commission rate of platform
     uint96 public royaltyRate = 500;    
@@ -37,7 +37,7 @@ contract ModelNFTFactory is Ownable {
         require(mintLimit > 0,  "Incorrect mint limit.");
 
         modelNFT = new ModelNFT(modelName, modelID, mintLimit, royaltyRate, msg.sender, royaltyReceiver);
-        modelNFTArray.push(modelNFT);
+        // modelNFTArray.push(modelNFT);
         emit NFTCreated(modelID, address(modelNFT));
     }
 
@@ -56,11 +56,17 @@ contract ModelNFTFactory is Ownable {
     @param account wallet address or smart contract
     */
     function setRoyaltyReceiver(address account) external onlyOwner {
-        require(royaltyReceiver != address(0), "Address can't be zero.");
+        require(account != address(0), "Address can't be zero.");
 
         royaltyReceiver = payable(account);
     }
 
+    function getRoyaltyReceiver() public view returns(address) {
+        return royaltyReceiver;
+    }
 
+    function getRoyaltyRate() public view returns(uint96) {
+        return royaltyRate;
+    }
 }
 
