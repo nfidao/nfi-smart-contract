@@ -23,6 +23,10 @@ contract ModelNFTFactory is Ownable {
         address modelNFTAddress
     );
 
+    constructor (address receiver) {
+        royaltyReceiver = payable(receiver);
+    }
+
     /**
     @dev Create new model NFT smart contract with parameters
     @param modelName name of model
