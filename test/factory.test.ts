@@ -1,12 +1,13 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { ethers, waffle } from "hardhat";
-import { ModelNFTFactory } from "../typechain";
+import { ethers, upgrades, waffle } from "hardhat";
+import { ModelNFTFactory, MockModelNFTFactory } from "../typechain";
 
 describe("ModelNFTFactory", async () => {
   let modelNFTFactory: ModelNFTFactory;
   let deployer: SignerWithAddress;
-  let alice: SignerWithAddress;
+  let designer: SignerWithAddress;
+  let user: SignerWithAddress;
   // const ownerRole = ethers.utils.id("OWNER_ROLE");
 
   const MOCK_ADDRESS = ethers.utils.getAddress(
@@ -18,68 +19,74 @@ describe("ModelNFTFactory", async () => {
   );
   const fixture = async () => {
     const modelNFTFactory = await ethers.getContractFactory("ModelNFTFactory");
-    return (await modelNFTFactory.deploy(MOCK_ADDRESS)) as ModelNFTFactory;
+    return (await upgrades.deployProxy(modelNFTFactory, [MOCK_ADDRESS], {
+      initializer: "initialize",
+    })) as ModelNFTFactory;
   };
 
   beforeEach(async () => {
     modelNFTFactory = await waffle.loadFixture(fixture);
-    [deployer, alice] = await ethers.getSigners();
+    [deployer, designer, user] = await ethers.getSigners();
   });
 
-  it("should construct", async () => {
+  it("should initialize", async () => {
     expect(await modelNFTFactory.getRoyaltyReceiver()).to.equal(MOCK_ADDRESS);
   });
 
   describe("#createModelNFT", () => {
     const MODEL_NAME = "test";
     const MODEL_ID = "id";
-
     const MODEL_LIMIT = "100";
+    const MODEL_RATE = "100";
 
     it("should emit an event", async () => {
       await expect(
         modelNFTFactory
-          .connect(alice)
-          .createModelNFT(MODEL_NAME, MODEL_ID, MODEL_LIMIT)
+          .connect(user)
+          .createModelNFT(
+            MODEL_NAME,
+            MODEL_ID,
+            designer.address,
+            MODEL_RATE,
+            MODEL_LIMIT
+          )
       ).to.emit(modelNFTFactory, "NFTCreated");
-    });
-  });
-
-  describe("#setRoyaltyRate", () => {
-    const RATE = 100;
-
-    it("should set royalty rate", async () => {
-      await modelNFTFactory.connect(deployer).setRoyaltyRate(RATE);
-
-      expect(await modelNFTFactory.connect(deployer).getRoyaltyRate()).to.equal(
-        RATE
-      );
-    });
-
-    it("should revert if rate is greater than 1000", async () => {
-      await expect(modelNFTFactory.connect(deployer).setRoyaltyRate(1000)).to.be
-        .reverted;
-    });
-
-    it("should allow only owner", async () => {
-      await expect(modelNFTFactory.connect(alice).setRoyaltyRate(RATE)).to.be
-        .reverted;
     });
   });
 
   describe("#setRoyaltyReceiver", () => {
     it("should set royalty receiver", async () => {
-      await modelNFTFactory.connect(deployer).setRoyaltyReceiver(alice.address);
+      await modelNFTFactory.connect(deployer).setRoyaltyReceiver(user.address);
 
       expect(
         await modelNFTFactory.connect(deployer).getRoyaltyReceiver()
-      ).to.equal(alice.address);
+      ).to.equal(user.address);
     });
 
     it("should set royalty receiver", async () => {
       await expect(
         modelNFTFactory.connect(deployer).setRoyaltyReceiver(ZERO_ADDRESS)
       ).to.be.reverted;
+    });
+  });
+
+  describe("#upgradablity", () => {
+    let mockModelNFTFactory: any;
+    let mockModelNFTFactoryAttached: any;
+
+    beforeEach(async () => {
+      mockModelNFTFactory = await ethers.getContractFactory(
+        "MockModelNFTFactory"
+      );
+
+      await upgrades.upgradeProxy(modelNFTFactory.address, mockModelNFTFactory);
+      mockModelNFTFactoryAttached = await mockModelNFTFactory.attach(
+        modelNFTFactory.address
+      );
+    });
+
+    it("should add custom function", async () => {
+      expect(await mockModelNFTFactoryAttached.customFunction()).to.equal(true);
     });
   });
 });

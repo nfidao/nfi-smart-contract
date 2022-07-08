@@ -3,9 +3,9 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./ModelNFT.sol";
+import "../ModelNFT.sol";
 
-contract ModelNFTFactory is Initializable, OwnableUpgradeable {
+contract MockModelNFTFactory is OwnableUpgradeable {
     // Instantiate NFT contract
     ModelNFT private _modelNFT;
 
@@ -20,8 +20,6 @@ contract ModelNFTFactory is Initializable, OwnableUpgradeable {
 
     function initialize(address receiver) public initializer {
         _royaltyReceiver = payable(receiver);
-
-        __Ownable_init_unchained();
     }
 
     /**
@@ -53,6 +51,17 @@ contract ModelNFTFactory is Initializable, OwnableUpgradeable {
 
     function getRoyaltyReceiver() public view returns(address) {
         return _royaltyReceiver;
+    }
+
+    /**
+    @dev test function for upgradeability
+     */
+    function customFunction ()
+        public
+        pure
+        returns  (bool)
+    {
+        return true;
     }
 }
 

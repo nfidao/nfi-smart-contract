@@ -2,17 +2,24 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./lib/ERC721A.sol";
 
 // @author DeDe
 contract ModelNFT is
     ERC721A,
-    ERC2981
+    ERC2981,
+    AccessControl
 {
-    uint256 public mintLimit;
+    bytes32 public constant DESIGNER_ROLE = keccak256("DESIGNER_ROLE");
+    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
+    uint256 public mintLimit;
+    address private _designer;
+    address private _manager;
     mapping(uint256 => string) private _tokenURIs;
+
    
     // Event 
     event NFTMinted(
@@ -24,16 +31,24 @@ contract ModelNFT is
         string memory symbol,
         uint256 limit, 
         uint96 rate, 
+        address designer,
+        address manager,
         address payable royaltyReceiver
     )
         ERC721A(name, symbol)        
     {
         mintLimit = limit;
+        _designer = designer;
+
         _setDefaultRoyalty(royaltyReceiver, rate);
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DESIGNER_ROLE, designer);
+        _grantRole(MANAGER_ROLE, manager);
     }
 
     /**
-    @dev Mint tokens
+    @dev Everybody can mint NFT
      */
     function mint(
         address to, string memory uri
@@ -71,7 +86,31 @@ contract ModelNFT is
         return super.tokenURI(tokenId);
     }
 
+    /**
+    @dev Getter functions
+     */
+    function getDesigner() public view returns(address) {
+        return _designer;
+    }
 
+    function getManager() public view returns(address) {
+        return _manager;
+    }
+
+    /**
+    @dev Setter functions
+     */
+    function setDesigner(address designer) external onlyRole(DESIGNER_ROLE) {
+        _designer = designer;
+    }
+
+    function setManager(address manager) external onlyRole(MANAGER_ROLE) {
+        _manager = manager;
+    }
+    
+    /**
+    @dev Define _setTokenURI() function like ERC721URIStorage
+     */
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) private {
         require(_exists(tokenId), "Token is not exist!");
         _tokenURIs[tokenId] = _tokenURI;
@@ -82,6 +121,7 @@ contract ModelNFT is
      */
     function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
         external
+        onlyRole(MANAGER_ROLE)
     {
         _setDefaultRoyalty(receiver, feeBasisPoints);
     }
@@ -89,7 +129,7 @@ contract ModelNFT is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721A, ERC2981)
+        override(ERC721A, ERC2981, AccessControl)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
