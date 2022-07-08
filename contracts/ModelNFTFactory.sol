@@ -6,16 +6,13 @@ import "./ModelNFT.sol";
 
 contract ModelNFTFactory is Ownable {
     // Instantiate NFT contract
-    ModelNFT private modelNFT;
-
-    // Array of created model NFTs 
-    // ModelNFT[] public modelNFTArray;
+    ModelNFT private _modelNFT;
 
     // Commission rate of platform
-    uint96 public royaltyRate = 500;    
+    uint96 private _royaltyRate = 500;    
 
     // platform account
-    address payable public royaltyReceiver;
+    address payable private _royaltyReceiver;
     
     // Event 
     event NFTCreated(
@@ -24,7 +21,7 @@ contract ModelNFTFactory is Ownable {
     );
 
     constructor (address receiver) {
-        royaltyReceiver = payable(receiver);
+        _royaltyReceiver = payable(receiver);
     }
 
     /**
@@ -36,9 +33,9 @@ contract ModelNFTFactory is Ownable {
     function createModelNFT(string memory modelName, string memory modelID, uint256 mintLimit) external {
         require(mintLimit > 0,  "Incorrect mint limit.");
 
-        modelNFT = new ModelNFT(modelName, modelID, mintLimit, royaltyRate, msg.sender, royaltyReceiver);
+        _modelNFT = new ModelNFT(modelName, modelID, mintLimit, _royaltyRate, _royaltyReceiver);
         // modelNFTArray.push(modelNFT);
-        emit NFTCreated(modelID, address(modelNFT));
+        emit NFTCreated(modelID, address(_modelNFT));
     }
 
     /**
@@ -48,7 +45,7 @@ contract ModelNFTFactory is Ownable {
     function setRoyaltyRate(uint96 rate) external onlyOwner {
         require(rate < 1000, "Rate should be less than 1000.");
 
-        royaltyRate = rate;
+        _royaltyRate = rate;
     }
 
     /**
@@ -58,15 +55,15 @@ contract ModelNFTFactory is Ownable {
     function setRoyaltyReceiver(address account) external onlyOwner {
         require(account != address(0), "Address can't be zero.");
 
-        royaltyReceiver = payable(account);
+        _royaltyReceiver = payable(account);
     }
 
     function getRoyaltyReceiver() public view returns(address) {
-        return royaltyReceiver;
+        return _royaltyReceiver;
     }
 
     function getRoyaltyRate() public view returns(uint96) {
-        return royaltyRate;
+        return _royaltyRate;
     }
 }
 

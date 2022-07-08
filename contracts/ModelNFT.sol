@@ -2,37 +2,34 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "./lib/ERC721A.sol";
 
 // @author DeDe
 contract ModelNFT is
     ERC721A,
-    ERC2981,
-    AccessControlEnumerable
+    ERC2981
 {
-    using Counters for Counters.Counter;
-
-    Counters.Counter private _tokenIdCounter;
     uint256 public mintLimit;
 
     mapping(uint256 => string) private _tokenURIs;
    
+    // Event 
+    event NFTMinted(
+        uint tokenId
+    );
+
     constructor(
         string memory name,
         string memory symbol,
         uint256 limit, 
         uint96 rate, 
-        address designer,
         address payable royaltyReceiver
     )
         ERC721A(name, symbol)        
     {
         mintLimit = limit;
         _setDefaultRoyalty(royaltyReceiver, rate);
-        _grantRole(DEFAULT_ADMIN_ROLE, designer);
     }
 
     /**
@@ -46,12 +43,10 @@ contract ModelNFT is
         
         // mint a token using erc721a
         _safeMint(to, 1);
-
         // set token uri
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _setTokenURI(tokenId, uri);
+        _setTokenURI(_currentIndex-1, uri);
         
+        emit NFTMinted(_currentIndex);
     }
 
     /**
@@ -85,17 +80,16 @@ contract ModelNFT is
     /**
     @notice Sets the contract-wide royalty info.
      */
-    // function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
-    //     external
-    //     onlyOwner
-    // {
-    //     _setDefaultRoyalty(receiver, feeBasisPoints);
-    // }
+    function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
+        external
+    {
+        _setDefaultRoyalty(receiver, feeBasisPoints);
+    }
 
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721A, ERC2981, AccessControlEnumerable)
+        override(ERC721A, ERC2981)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

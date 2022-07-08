@@ -33,6 +33,7 @@ describe("ModelNFTFactory", async () => {
   describe("#createModelNFT", () => {
     const MODEL_NAME = "test";
     const MODEL_ID = "id";
+
     const MODEL_LIMIT = "100";
 
     it("should emit an event", async () => {

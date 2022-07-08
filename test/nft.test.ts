@@ -7,7 +7,6 @@ import { ModelNFT } from "../typechain";
 describe("modelNFT", () => {
   let modelNFT: ModelNFT;
   let deployer: SignerWithAddress;
-  let designer: SignerWithAddress;
   let receiver: SignerWithAddress;
   let user: SignerWithAddress;
 
@@ -20,7 +19,7 @@ describe("modelNFT", () => {
     "0x0000000000000000000000000000000000000000"
   );
   const fixture = async () => {
-    [deployer, designer, receiver, user] = await ethers.getSigners();
+    [deployer, receiver, user] = await ethers.getSigners();
 
     const modelNFT = await ethers.getContractFactory("ModelNFT");
 
@@ -29,7 +28,6 @@ describe("modelNFT", () => {
       MODEL_ID,
       MODEL_LIMIT,
       RATE,
-      designer.address,
       receiver.address
     )) as ModelNFT;
   };
