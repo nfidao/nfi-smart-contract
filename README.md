@@ -39,9 +39,6 @@ npx hardhat test
 
 - [@donald20](https://www.gitlab.com/donald20)
 
-
-
 # License
 
 Copyright (c) 2022 Decentralized Design
-

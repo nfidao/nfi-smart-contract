@@ -11,12 +11,9 @@ contract ModelNFTFactory is Initializable, OwnableUpgradeable {
 
     // treasury account
     address payable private _royaltyReceiver;
-    
-    // Event 
-    event NFTCreated(
-        string modelID,
-        address modelNFTAddress
-    );
+
+    // Event
+    event NFTCreated(string modelID, address modelNFTAddress);
 
     function initialize(address receiver) public initializer {
         _royaltyReceiver = payable(receiver);
@@ -32,8 +29,14 @@ contract ModelNFTFactory is Initializable, OwnableUpgradeable {
     @param rate royalty fee rate
     @param mintLimit upper limit of minting
      */
-    function createModelNFT(string memory modelName, string memory modelID, address designer, uint16 rate, uint256 mintLimit) external {
-        require(mintLimit > 0,  "Incorrect mint limit.");
+    function createModelNFT(
+        string memory modelName,
+        string memory modelID,
+        address designer,
+        uint16 rate,
+        uint256 mintLimit
+    ) external {
+        require(mintLimit > 0, "Incorrect mint limit.");
         require(rate < 1000, "Rate should be less than 1000.");
 
         _modelNFT = new ModelNFT(modelName, modelID, mintLimit, rate, designer, msg.sender, _royaltyReceiver);
@@ -51,8 +54,7 @@ contract ModelNFTFactory is Initializable, OwnableUpgradeable {
         _royaltyReceiver = payable(account);
     }
 
-    function getRoyaltyReceiver() public view returns(address) {
+    function getRoyaltyReceiver() public view returns (address) {
         return _royaltyReceiver;
     }
 }
-
