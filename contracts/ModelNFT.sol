@@ -2,76 +2,65 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "./lib/ERC721A.sol";
+import "erc721a/contracts/ERC721A.sol";
 
 // @author DeDe
-contract ModelNFT is
-    ERC721A,
-    ERC2981,
-    AccessControl
-{
-    bytes32 public constant DESIGNER_ROLE = keccak256("DESIGNER_ROLE");
-    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
-
+contract ModelNFT is ERC721A, ERC2981 {
     uint256 public mintLimit;
-    address private _designer;
-    address private _manager;
-    mapping(uint256 => string) private _tokenURIs;
 
-   
-    // Event 
-    event NFTMinted(
-        uint tokenId
-    );
+    address public designer;
+
+    address public manager;
+
+    mapping(uint256 => string) public tokenURIs;
+
+    modifier onlyDesigner() {
+        require(msg.sender == designer, "Unathorized");
+        _;
+    }
+
+    modifier onlyManager() {
+        require(msg.sender == manager, "Unauthorized");
+        _;
+    }
 
     constructor(
-        string memory name,
-        string memory symbol,
-        uint256 limit, 
-        uint96 rate, 
-        address designer,
-        address manager,
-        address payable royaltyReceiver
-    )
-        ERC721A(name, symbol)        
-    {
-        mintLimit = limit;
-        _designer = designer;
+        string memory _name,
+        string memory _symbol,
+        uint256 _limit,
+        uint96 _rate,
+        address _designer,
+        address _manager,
+        address payable _royaltyReceiver
+    ) ERC721A(_name, _symbol) {
+        mintLimit = _limit;
+        designer = _designer;
+        manager = _manager;
 
-        _setDefaultRoyalty(royaltyReceiver, rate);
-
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(DESIGNER_ROLE, designer);
-        _grantRole(MANAGER_ROLE, manager);
+        _setDefaultRoyalty(_royaltyReceiver, _rate);
     }
 
     /**
     @dev Everybody can mint NFT
      */
-    function mint(
-        address to, string memory uri
-    ) public  {
+    function mint(address to, string memory uri) public {
         // check if minting is possible
-        require(totalSupply() <= mintLimit, "Can't mint any more!");
-        
+        require(totalSupply() <= mintLimit, "Maximum limit has been reached");
+
         // mint a token using erc721a
         _safeMint(to, 1);
         // set token uri
-        _setTokenURI(_currentIndex-1, uri);
-        
-        emit NFTMinted(_currentIndex);
+        _setTokenURI(_nextTokenId() - 1, uri);
     }
 
     /**
     @dev Override ERC721A tokenURI() function. We can't use original tokenURI() function.
      */
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        
-        require(_exists(tokenId), "Token is not exist!");
+        require(_exists(tokenId), "Token does not exist");
 
-        string memory _tokenURI = _tokenURIs[tokenId];
+        string memory _tokenURI = tokenURIs[tokenId];
         string memory base = _baseURI();
 
         // If there is no base URI, return the token URI.
@@ -87,51 +76,34 @@ contract ModelNFT is
     }
 
     /**
-    @dev Getter functions
-     */
-    function getDesigner() public view returns(address) {
-        return _designer;
-    }
-
-    function getManager() public view returns(address) {
-        return _manager;
-    }
-
-    /**
     @dev Setter functions
      */
-    function setDesigner(address designer) external onlyRole(DESIGNER_ROLE) {
-        _designer = designer;
+    function setDesigner(address _designer) external onlyDesigner {
+        require(_designer != address(0), "Invalid address");
+        designer = _designer;
     }
 
-    function setManager(address manager) external onlyRole(MANAGER_ROLE) {
-        _manager = manager;
+    function setManager(address _manager) external onlyManager {
+        require(_manager != address(0), "Invalid address");
+        manager = _manager;
     }
-    
+
     /**
     @dev Define _setTokenURI() function like ERC721URIStorage
      */
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI) private {
-        require(_exists(tokenId), "Token is not exist!");
-        _tokenURIs[tokenId] = _tokenURI;
+    function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
+        require(_exists(_tokenId), "Token does not exist!");
+        tokenURIs[_tokenId] = _tokenURI;
     }
 
     /**
     @notice Sets the contract-wide royalty info.
      */
-    function setRoyaltyInfo(address receiver, uint96 feeBasisPoints)
-        external
-        onlyRole(MANAGER_ROLE)
-    {
-        _setDefaultRoyalty(receiver, feeBasisPoints);
+    function setRoyaltyInfo(address _receiver, uint96 _feeBasisPoints) external onlyManager {
+        _setDefaultRoyalty(_receiver, _feeBasisPoints);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721A, ERC2981, AccessControl)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
