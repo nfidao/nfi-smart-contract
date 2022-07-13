@@ -1,10 +1,12 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "erc721a/contracts/ERC721A.sol";
+import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
 contract ModelNFT is ERC721A, ERC2981 {
@@ -25,6 +27,9 @@ contract ModelNFT is ERC721A, ERC2981 {
     /// @dev authorized address who can sign the arbitrary data to allow minting.
     address public authorizedSignerAddress;
 
+    /// @dev royalty registry address that store the royalty info.
+    IRoyaltyRegistry public royaltyRegsitry;
+
     /// @dev dedicated to restrict one time minting per address.
     mapping(address => bool) public isAddressMinted;
 
@@ -32,6 +37,7 @@ contract ModelNFT is ERC721A, ERC2981 {
     mapping(uint256 => string) public tokenURIs;
 
     event AuthorizedSignerAddressUpdated(address indexed _sender, address _oldAddress, address _newAddress);
+    event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event URIUpdated(address indexed _sender, string _oldURI, string _newURI);
     event DesignerUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event ManagerUpdated(address indexed _sender, address _oldAddress, address _newAddress);
@@ -52,28 +58,27 @@ contract ModelNFT is ERC721A, ERC2981 {
      * @param _name token Name.
      * @param _symbol token Symbol.
      * @param _limit max mint limit.
-     * @param _rate royalty amount percentages.
      * @param _designer designer address.
      * @param _manager manager address.
      * @param _authorizedSignerAddress signer address.
-     * @param _royaltyReceiver royalty receiver address.
+     * @param _royaltyRegistry royalty receiver address.
      */
     constructor(
         string memory _name,
         string memory _symbol,
         uint256 _limit,
-        uint96 _rate,
         address _designer,
         address _manager,
         address _authorizedSignerAddress,
-        address payable _royaltyReceiver
+        address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
+        require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
+
         mintLimit = _limit;
         designer = _designer;
         manager = _manager;
         authorizedSignerAddress = _authorizedSignerAddress;
-
-        _setDefaultRoyalty(_royaltyReceiver, _rate);
+        royaltyRegsitry = IRoyaltyRegistry(_royaltyRegistry);
     }
 
     /**
@@ -107,6 +112,28 @@ contract ModelNFT is ERC721A, ERC2981 {
     }
 
     /**
+     * @dev override function for royaltyInfo ERC2981.
+     * @dev Will read the royalty rate from registry.
+     * Current flow does not support for token id unit royalty. Every token id will have the same royalty rate.
+     * So first param is commented out.
+     *
+     * @param _salePrice sale price.
+     *
+     * @return receiver address.
+     * @return royalty amount.
+     */
+    function royaltyInfo(
+        uint256, /*_tokenId*/
+        uint256 _salePrice
+    ) public view override returns (address, uint256) {
+        (address _receiver, uint96 royaltyRate) = royaltyRegsitry.getRoyaltyInfo(address(this));
+
+        uint256 royaltyAmount = (_salePrice * royaltyRate) / _feeDenominator();
+
+        return (_receiver, royaltyAmount);
+    }
+
+    /**
      * @dev Getter for the base URI.
      *
      * @return base URI of the NFT.
@@ -136,6 +163,18 @@ contract ModelNFT is ERC721A, ERC2981 {
         address oldSignerAddress = authorizedSignerAddress;
         authorizedSignerAddress = _signerAddress;
         emit AuthorizedSignerAddressUpdated(msg.sender, oldSignerAddress, authorizedSignerAddress);
+    }
+
+    /**
+     * @dev Update the authorized signer address.
+     *
+     * @param _royaltyRegistry new royalty registry address.
+     */
+    function changeRoyaltyRegistry(address _royaltyRegistry) external onlyManager {
+        require(Address.isContract(_royaltyRegistry), "Invalid address");
+        address oldRoyaltyRegistry = address(royaltyRegsitry);
+        royaltyRegsitry = IRoyaltyRegistry(_royaltyRegistry);
+        emit RoyaltyRegistryUpdated(msg.sender, oldRoyaltyRegistry, address(royaltyRegsitry));
     }
 
     /**
@@ -198,14 +237,6 @@ contract ModelNFT is ERC721A, ERC2981 {
         manager = _manager;
 
         emit ManagerUpdated(msg.sender, oldManagerAddress, manager);
-    }
-
-    /// @todo need to remove this and implement the royalty registry.
-    /**
-    @notice Sets the contract-wide royalty info.
-     */
-    function setRoyaltyInfo(address _receiver, uint96 _feeBasisPoints) external onlyManager {
-        _setDefaultRoyalty(_receiver, _feeBasisPoints);
     }
 
     /**
