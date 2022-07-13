@@ -9,7 +9,7 @@ import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
-contract ModelNFT is ERC721A, ERC2981 {
+contract ModelNFT is ERC2981, ERC721A {
     using ECDSA for bytes32;
 
     /// @notice max limit of minting.
@@ -109,11 +109,7 @@ contract ModelNFT is ERC721A, ERC2981 {
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
-        return
-            interfaceId == 0x01ffc9a7 || // ERC165 interface ID for ERC165.
-            interfaceId == 0x80ac58cd || // ERC165 interface ID for ERC721.
-            interfaceId == 0x5b5e139f || // ERC165 interface ID for ERC721Metadata.
-            interfaceId == 0x2a55205a; // ERC165 interface ID for ERC721Metadata.
+        return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
