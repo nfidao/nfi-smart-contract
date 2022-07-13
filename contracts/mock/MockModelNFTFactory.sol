@@ -20,26 +20,39 @@ contract MockModelNFTFactory is OwnableUpgradeable {
     }
 
     /**
-    @dev Create new model NFT smart contract with parameters
-    @param modelName name of model
-    @param modelID ID of model
-    @param designer Address of designer
-    @param rate royalty fee rate
-    @param mintLimit upper limit of minting
+     * @dev Create new model NFT smart contract with parameters.
+     * @param _modelName name of model.
+     * @param _modelID ID of model.
+     * @param _rate royalty fee rate.
+     * @param _designer Address of designer.
+     * @param _manager Address of manager.
+     * @param _signer Address of signer for minting.
+     * @param _mintLimit upper limit of minting.
      */
     function createModelNFT(
-        string memory modelName,
-        string memory modelID,
-        address designer,
-        uint16 rate,
-        uint256 mintLimit
+        string memory _modelName,
+        string memory _modelID,
+        uint96 _rate,
+        address _designer,
+        address _manager,
+        address _signer,
+        uint256 _mintLimit
     ) external {
-        require(mintLimit > 0, "Incorrect mint limit.");
-        require(rate < 1000, "Rate should be less than 1000.");
+        require(_mintLimit > 0, "Incorrect mint limit.");
+        require(_rate < 1000, "Rate should be less than 1000.");
 
-        _modelNFT = new ModelNFT(modelName, modelID, mintLimit, rate, designer, msg.sender, _royaltyReceiver);
+        _modelNFT = new ModelNFT(
+            _modelName,
+            _modelID,
+            _mintLimit,
+            _rate,
+            _designer,
+            _manager,
+            _signer,
+            _royaltyReceiver
+        );
         // modelNFTArray.push(modelNFT);
-        emit NFTCreated(modelID, address(_modelNFT));
+        emit NFTCreated(_modelID, address(_modelNFT));
     }
 
     /**
