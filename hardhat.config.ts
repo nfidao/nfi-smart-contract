@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
+import "hardhat-deploy";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-solhint";
 import "./scripts/tasks/proxyInteraction";
