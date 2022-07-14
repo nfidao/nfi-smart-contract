@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import "../ModelNFTFactory.sol";
+import "../royalty/RoyaltyRegistry.sol";
 
-contract MockModelNFTFactory is ModelNFTFactory {
+contract MockRoyaltyRegistry is RoyaltyRegistry {
     /**
     @dev test function for upgradeability
      */

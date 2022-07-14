@@ -9,7 +9,7 @@ import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
-contract ModelNFT is ERC721A, ERC2981 {
+contract ModelNFT is ERC2981, ERC721A {
     using ECDSA for bytes32;
 
     /// @notice max limit of minting.
@@ -28,7 +28,7 @@ contract ModelNFT is ERC721A, ERC2981 {
     address public authorizedSignerAddress;
 
     /// @dev royalty registry address that store the royalty info.
-    IRoyaltyRegistry public royaltyRegsitry;
+    IRoyaltyRegistry public royaltyRegistry;
 
     /// @dev dedicated to restrict one time minting per address.
     mapping(address => bool) public isAddressMinted;
@@ -38,12 +38,12 @@ contract ModelNFT is ERC721A, ERC2981 {
 
     event AuthorizedSignerAddressUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
-    event URIUpdated(address indexed _sender, string _oldURI, string _newURI);
-    event DesignerUpdated(address indexed _sender, address _oldAddress, address _newAddress);
-    event ManagerUpdated(address indexed _sender, address _oldAddress, address _newAddress);
+    event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
+    event DesignerUpdated(address indexed _oldAddress, address _newAddress);
+    event ManagerUpdated(address indexed _oldAddress, address _newAddress);
 
     modifier onlyDesigner() {
-        require(msg.sender == designer, "Unathorized");
+        require(msg.sender == designer, "Unauthorized");
         _;
     }
 
@@ -73,12 +73,13 @@ contract ModelNFT is ERC721A, ERC2981 {
         address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
+        require(_authorizedSignerAddress != address(0), "Invalid signer address");
 
         mintLimit = _limit;
         designer = _designer;
         manager = _manager;
         authorizedSignerAddress = _authorizedSignerAddress;
-        royaltyRegsitry = IRoyaltyRegistry(_royaltyRegistry);
+        royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
     }
 
     /**
@@ -107,8 +108,8 @@ contract ModelNFT is ERC721A, ERC2981 {
         return super.tokenURI(_tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+        return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -126,7 +127,7 @@ contract ModelNFT is ERC721A, ERC2981 {
         uint256, /*_tokenId*/
         uint256 _salePrice
     ) public view override returns (address, uint256) {
-        (address _receiver, uint96 royaltyRate) = royaltyRegsitry.getRoyaltyInfo(address(this));
+        (address _receiver, uint96 royaltyRate) = royaltyRegistry.getRoyaltyInfo(address(this));
 
         uint256 royaltyAmount = (_salePrice * royaltyRate) / _feeDenominator();
 
@@ -150,7 +151,7 @@ contract ModelNFT is ERC721A, ERC2981 {
     function setBaseURI(string memory _newBaseURI) external onlyManager {
         string memory _oldUri = _baseURIPrefix;
         _baseURIPrefix = _newBaseURI;
-        emit URIUpdated(msg.sender, _oldUri, _baseURIPrefix);
+        emit BaseUriUpdated(msg.sender, _oldUri, _baseURIPrefix);
     }
 
     /**
@@ -172,9 +173,9 @@ contract ModelNFT is ERC721A, ERC2981 {
      */
     function changeRoyaltyRegistry(address _royaltyRegistry) external onlyManager {
         require(Address.isContract(_royaltyRegistry), "Invalid address");
-        address oldRoyaltyRegistry = address(royaltyRegsitry);
-        royaltyRegsitry = IRoyaltyRegistry(_royaltyRegistry);
-        emit RoyaltyRegistryUpdated(msg.sender, oldRoyaltyRegistry, address(royaltyRegsitry));
+        address oldRoyaltyRegistry = address(royaltyRegistry);
+        royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
+        emit RoyaltyRegistryUpdated(msg.sender, oldRoyaltyRegistry, address(royaltyRegistry));
     }
 
     /**
@@ -204,11 +205,11 @@ contract ModelNFT is ERC721A, ERC2981 {
         // Mark address for minting
         isAddressMinted[msg.sender] = true;
 
-        // set token uri
-        _setTokenURI(_totalSupply, _uri);
-
         // mint a token using erc721a
         _safeMint(_to, 1);
+
+        // set token uri
+        _setTokenURI(_totalSupply, _uri);
     }
 
     /**
@@ -222,7 +223,7 @@ contract ModelNFT is ERC721A, ERC2981 {
         address oldDesignerAddress = designer;
         designer = _designer;
 
-        emit DesignerUpdated(msg.sender, oldDesignerAddress, designer);
+        emit DesignerUpdated(oldDesignerAddress, designer);
     }
 
     /**
@@ -236,7 +237,7 @@ contract ModelNFT is ERC721A, ERC2981 {
         address oldManagerAddress = manager;
         manager = _manager;
 
-        emit ManagerUpdated(msg.sender, oldManagerAddress, manager);
+        emit ManagerUpdated(oldManagerAddress, manager);
     }
 
     /**
@@ -246,7 +247,6 @@ contract ModelNFT is ERC721A, ERC2981 {
      * @return bool Is signature valid or not
      */
     function _isValidSignature(bytes32 _hash, bytes memory _signature) internal view returns (bool) {
-        require(authorizedSignerAddress != address(0), "Invalid signer addr");
         bytes32 signedHash = _hash.toEthSignedMessageHash();
         return signedHash.recover(_signature) == authorizedSignerAddress;
     }
@@ -265,7 +265,6 @@ contract ModelNFT is ERC721A, ERC2981 {
      * @param _tokenURI token uri that will be associated to the token id.
      */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
-        require(_exists(_tokenId), "Token does not exist");
         tokenURIs[_tokenId] = _tokenURI;
     }
 }
