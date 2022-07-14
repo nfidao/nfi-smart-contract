@@ -2,12 +2,15 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, waffle } from "hardhat";
+// eslint-disable-next-line node/no-missing-import
 import type { ModelNFT, RoyaltyRegistry } from "../typechain";
 
 const {
   constants: { AddressZero },
   getContractFactory,
 } = ethers;
+
+const royaltyFeeDenominator = BigNumber.from(10000);
 
 const getMintSignature = async function (
   signerAccount: SignerWithAddress,
@@ -94,7 +97,9 @@ describe("ModelNFT", () => {
       const saleAmount = RATE;
       const royaltyInfo = await modelNFT.royaltyInfo(0, saleAmount);
       expect(royaltyInfo[0]).to.equal(royaltyReceiver.address);
-      expect(royaltyInfo[1].toString()).to.equal(saleAmount.div(RATE));
+      expect(royaltyInfo[1].toString()).to.equal(
+        saleAmount.mul(RATE).div(royaltyFeeDenominator)
+      );
     });
 
     it("base uri should be empty", async () => {
@@ -106,12 +111,12 @@ describe("ModelNFT", () => {
       const tx = await modelNFT.connect(manager).setBaseURI(newBaseURI);
       expect(await modelNFT.baseURI()).to.equal(newBaseURI);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(modelNFT, "BaseUriUpdated")
         .withArgs(manager.address, "", newBaseURI);
     });
 
-    it("supports interface", async() => {
+    it("supports interface", async () => {
       const interfaces = [
         "0x01ffc9a7", // ERC165 interface ID for ERC165.
         "0x80ac58cd", // ERC165 interface ID for ERC721.
@@ -157,7 +162,7 @@ describe("ModelNFT", () => {
         ).to.be.revertedWith("Invalid signer address");
       });
 
-      it("token uri should revert since token does not exist", async() => {
+      it("token uri should revert since token does not exist", async () => {
         await expect(modelNFT.tokenURI(0)).to.be.revertedWith(
           "Token does not exist"
         );
@@ -180,7 +185,7 @@ describe("ModelNFT", () => {
       const tx = await modelNFT.connect(designer).setDesigner(bob.address);
       expect(await modelNFT.designer()).to.equal(bob.address);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(modelNFT, "DesignerUpdated")
         .withArgs(designer.address, bob.address);
     });
@@ -190,7 +195,7 @@ describe("ModelNFT", () => {
       const tx = await modelNFT.connect(manager).setManager(bob.address);
       expect(await modelNFT.manager()).to.equal(bob.address);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(modelNFT, "ManagerUpdated")
         .withArgs(manager.address, bob.address);
     });
@@ -202,7 +207,7 @@ describe("ModelNFT", () => {
         .changeAuthorizedSignerAddress(bob.address);
       expect(await modelNFT.authorizedSignerAddress()).to.equal(bob.address);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(modelNFT, "AuthorizedSignerAddressUpdated")
         .withArgs(manager.address, signer.address, bob.address);
     });
@@ -216,7 +221,7 @@ describe("ModelNFT", () => {
         .changeRoyaltyRegistry(modelNFT.address);
       expect(await modelNFT.royaltyRegistry()).to.equal(modelNFT.address);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(modelNFT, "RoyaltyRegistryUpdated")
         .withArgs(manager.address, royaltyRegistry.address, modelNFT.address);
     });
@@ -344,18 +349,21 @@ describe("ModelNFT", () => {
     it("mint nft by multiple users", async () => {
       const nftReceiver = sarah.address;
       const iterations = 5;
-      let uri, signature, sender;
+      let uri, signature, sender, tx;
       const accounts = await ethers.getSigners();
 
       for (let i = 0; i < iterations; i++) {
         uri = `https://${i}`;
         sender = accounts[i];
         signature = await getMintSignature(signer, modelNFT, sender, uri);
-        await modelNFT.connect(sender).mint(nftReceiver, uri, signature);
+        tx = await modelNFT.connect(sender).mint(nftReceiver, uri, signature);
         expect(await modelNFT.totalSupply()).to.equal(i + 1);
         expect(await modelNFT.balanceOf(sarah.address)).to.equal(i + 1);
         expect(await modelNFT.ownerOf(i)).to.equal(sarah.address);
         expect(await modelNFT.tokenURI(i)).to.equal(uri);
+        await expect(tx)
+          .to.emit(modelNFT, "Transfer")
+          .withArgs(AddressZero, sarah.address, i);
       }
 
       expect(await modelNFT.totalSupply()).to.equal(iterations);
@@ -367,8 +375,10 @@ describe("ModelNFT", () => {
         const uri = "https://1";
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, sarah, uri);
-        await expect(modelNFT.connect(bob).mint(nftReceiver, uri, signature)).to.be.revertedWith("Invalid signature");
-      })
+        await expect(
+          modelNFT.connect(bob).mint(nftReceiver, uri, signature)
+        ).to.be.revertedWith("Invalid signature");
+      });
 
       it("mint multiple nft should revert", async () => {
         const nftReceiver = sarah.address;

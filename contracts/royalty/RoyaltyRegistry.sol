@@ -8,7 +8,7 @@ import "./RoyaltyStorage.sol";
 
 contract RoyaltyRegistry is RoyaltyStorage {
     /// @dev emitted when royalties set for token.
-    event RoyaltySetForCollection(address indexed _token, uint96 _royaltyRate);
+    event RoyaltySetForCollection(address indexed _token, uint96 _oldRoyaltyRate, uint96 _royaltyRate);
 
     event ReceiverUpdated(address oldReceiver, address newReceiver);
 
@@ -84,9 +84,11 @@ contract RoyaltyRegistry is RoyaltyStorage {
         require(_token != address(0), "Invalid token");
         require(_royaltyRate <= MAX_RATE_ROYALTY, "Invalid Rate");
 
+        uint96 _oldRoyaltyRate = royaltyRateForCollection[_token];
+
         royaltyRateForCollection[_token] = _royaltyRate;
 
-        emit RoyaltySetForCollection(_token, _royaltyRate);
+        emit RoyaltySetForCollection(_token, _oldRoyaltyRate, _royaltyRate);
     }
 
     /**
