@@ -1,0 +1,483 @@
+{
+  "address": "0xBd93A901614988F1c127D3526f1214AFeCF6533E",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint96",
+          "name": "oldRate",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint96",
+          "name": "newRate",
+          "type": "uint96"
+        }
+      ],
+      "name": "DefaultRoyaltyRatePercentageUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "version",
+          "type": "uint8"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldReceiver",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newReceiver",
+          "type": "address"
+        }
+      ],
+      "name": "ReceiverUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint96",
+          "name": "_oldRoyaltyRate",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint96",
+          "name": "_royaltyRate",
+          "type": "uint96"
+        }
+      ],
+      "name": "RoyaltySetForCollection",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_RATE_ROYALTY",
+      "outputs": [
+        {
+          "internalType": "uint96",
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint96",
+          "name": "_newDefaultRate",
+          "type": "uint96"
+        }
+      ],
+      "name": "changeDefaultRoyaltyRatePercentage",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newReceiver",
+          "type": "address"
+        }
+      ],
+      "name": "changeReceiver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "defaultRoyaltyRatePercentage",
+      "outputs": [
+        {
+          "internalType": "uint96",
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        }
+      ],
+      "name": "getRoyaltyInfo",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "_receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint96",
+          "name": "_royaltyRatePercentage",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint96",
+          "name": "_defaultRateRoyaltyPercentage",
+          "type": "uint96"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "receiver",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "royaltyRateForCollection",
+      "outputs": [
+        {
+          "internalType": "uint96",
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "_tokens",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint96[]",
+          "name": "_royaltyRates",
+          "type": "uint96[]"
+        }
+      ],
+      "name": "setRoyaltyRateForCollections",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x93c439f1557f75a7da3a27bb58d204de0fce639ad44e0c741653c04fea5f6e08",
+  "receipt": {
+    "to": null,
+    "from": "0x9af703BDDf6b166B64846599F56b68ada1323b2a",
+    "contractAddress": "0xBd93A901614988F1c127D3526f1214AFeCF6533E",
+    "transactionIndex": 29,
+    "gasUsed": "1221267",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x4bffaa92453f49aebf47f25af0a3bdd0f63a599730deafe63c5fec9041aae9c2",
+    "transactionHash": "0x93c439f1557f75a7da3a27bb58d204de0fce639ad44e0c741653c04fea5f6e08",
+    "logs": [],
+    "blockNumber": 7225767,
+    "cumulativeGasUsed": "7660595",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "f420c5192ba7b774d56868d053171d7d",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.4+commit.c7e474f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint96\",\"name\":\"oldRate\",\"type\":\"uint96\"},{\"indexed\":false,\"internalType\":\"uint96\",\"name\":\"newRate\",\"type\":\"uint96\"}],\"name\":\"DefaultRoyaltyRatePercentageUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldReceiver\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newReceiver\",\"type\":\"address\"}],\"name\":\"ReceiverUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint96\",\"name\":\"_oldRoyaltyRate\",\"type\":\"uint96\"},{\"indexed\":false,\"internalType\":\"uint96\",\"name\":\"_royaltyRate\",\"type\":\"uint96\"}],\"name\":\"RoyaltySetForCollection\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"MAX_RATE_ROYALTY\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint96\",\"name\":\"_newDefaultRate\",\"type\":\"uint96\"}],\"name\":\"changeDefaultRoyaltyRatePercentage\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_newReceiver\",\"type\":\"address\"}],\"name\":\"changeReceiver\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"defaultRoyaltyRatePercentage\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"getRoyaltyInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"_royaltyRatePercentage\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_receiver\",\"type\":\"address\"},{\"internalType\":\"uint96\",\"name\":\"_defaultRateRoyaltyPercentage\",\"type\":\"uint96\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"receiver\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"royaltyRateForCollection\",\"outputs\":[{\"internalType\":\"uint96\",\"name\":\"\",\"type\":\"uint96\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"_tokens\",\"type\":\"address[]\"},{\"internalType\":\"uint96[]\",\"name\":\"_royaltyRates\",\"type\":\"uint96[]\"}],\"name\":\"setRoyaltyRateForCollections\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"RoyaltySetForCollection(address,uint96,uint96)\":{\"details\":\"emitted when royalties set for token.\"}},\"kind\":\"dev\",\"methods\":{\"changeDefaultRoyaltyRatePercentage(uint96)\":{\"details\":\"setter for defaultRoyaltyRatePercentage\",\"params\":{\"_newDefaultRate\":\"new default rate for royalty.\"}},\"changeReceiver(address)\":{\"details\":\"setter for receiver address.\",\"params\":{\"_newReceiver\":\"new Receiver address\"}},\"getRoyaltyInfo(address)\":{\"details\":\"royalty info for specific token / collection.It will return custom rate for the token, otherwise will return the default one.\",\"params\":{\"_token\":\"address of token / collection.\"},\"returns\":{\"_receiver\":\"receiver address.\",\"_royaltyRatePercentage\":\"royalty rate percentage.\"}},\"initialize(address,uint96)\":{\"params\":{\"_defaultRateRoyaltyPercentage\":\"default royalty percentage.\",\"_receiver\":\"receiver address.\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"setRoyaltyRateForCollections(address[],uint96[])\":{\"details\":\"set royalty rate for specific collection. Support multiple set. The length of array between tokens & rates must exactly the same.\",\"params\":{\"_royaltyRates\":\"array of royalty rates.\",\"_tokens\":\"array of token address.\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"changeDefaultRoyaltyRatePercentage(uint96)\":{\"notice\":\"the deafult royalty rate can be 0.\"},\"initialize(address,uint96)\":{\"notice\":\"Initialization for upgradeable contract.\"},\"setRoyaltyRateForCollections(address[],uint96[])\":{\"notice\":\"the rate will be applied to all of token ids inside the collection.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/royalty/RoyaltyRegistry.sol\":\"RoyaltyRegistry\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.7.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/ContextUpgradeable.sol\\\";\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    function __Ownable_init() internal onlyInitializing {\\n        __Ownable_init_unchained();\\n    }\\n\\n    function __Ownable_init_unchained() internal onlyInitializing {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n\\n    /**\\n     * @dev This empty reserved space is put in place to allow future versions to add new\\n     * variables without shifting down storage in the inheritance chain.\\n     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps\\n     */\\n    uint256[49] private __gap;\\n}\\n\",\"keccak256\":\"0x247c62047745915c0af6b955470a72d1696ebad4352d7d3011aef1a2463cd888\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.7.0) (proxy/utils/Initializable.sol)\\n\\npragma solidity ^0.8.2;\\n\\nimport \\\"../../utils/AddressUpgradeable.sol\\\";\\n\\n/**\\n * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed\\n * behind a proxy. Since proxied contracts do not make use of a constructor, it's common to move constructor logic to an\\n * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer\\n * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.\\n *\\n * The initialization functions use a version number. Once a version number is used, it is consumed and cannot be\\n * reused. This mechanism prevents re-execution of each \\\"step\\\" but allows the creation of new initialization steps in\\n * case an upgrade adds a module that needs to be initialized.\\n *\\n * For example:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * contract MyToken is ERC20Upgradeable {\\n *     function initialize() initializer public {\\n *         __ERC20_init(\\\"MyToken\\\", \\\"MTK\\\");\\n *     }\\n * }\\n * contract MyTokenV2 is MyToken, ERC20PermitUpgradeable {\\n *     function initializeV2() reinitializer(2) public {\\n *         __ERC20Permit_init(\\\"MyToken\\\");\\n *     }\\n * }\\n * ```\\n *\\n * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as\\n * possible by providing the encoded function call as the `_data` argument to {ERC1967Proxy-constructor}.\\n *\\n * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure\\n * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.\\n *\\n * [CAUTION]\\n * ====\\n * Avoid leaving a contract uninitialized.\\n *\\n * An uninitialized contract can be taken over by an attacker. This applies to both a proxy and its implementation\\n * contract, which may impact the proxy. To prevent the implementation contract from being used, you should invoke\\n * the {_disableInitializers} function in the constructor to automatically lock it when it is deployed:\\n *\\n * [.hljs-theme-light.nopadding]\\n * ```\\n * /// @custom:oz-upgrades-unsafe-allow constructor\\n * constructor() {\\n *     _disableInitializers();\\n * }\\n * ```\\n * ====\\n */\\nabstract contract Initializable {\\n    /**\\n     * @dev Indicates that the contract has been initialized.\\n     * @custom:oz-retyped-from bool\\n     */\\n    uint8 private _initialized;\\n\\n    /**\\n     * @dev Indicates that the contract is in the process of being initialized.\\n     */\\n    bool private _initializing;\\n\\n    /**\\n     * @dev Triggered when the contract has been initialized or reinitialized.\\n     */\\n    event Initialized(uint8 version);\\n\\n    /**\\n     * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,\\n     * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.\\n     */\\n    modifier initializer() {\\n        bool isTopLevelCall = !_initializing;\\n        require(\\n            (isTopLevelCall && _initialized < 1) || (!AddressUpgradeable.isContract(address(this)) && _initialized == 1),\\n            \\\"Initializable: contract is already initialized\\\"\\n        );\\n        _initialized = 1;\\n        if (isTopLevelCall) {\\n            _initializing = true;\\n        }\\n        _;\\n        if (isTopLevelCall) {\\n            _initializing = false;\\n            emit Initialized(1);\\n        }\\n    }\\n\\n    /**\\n     * @dev A modifier that defines a protected reinitializer function that can be invoked at most once, and only if the\\n     * contract hasn't been initialized to a greater version before. In its scope, `onlyInitializing` functions can be\\n     * used to initialize parent contracts.\\n     *\\n     * `initializer` is equivalent to `reinitializer(1)`, so a reinitializer may be used after the original\\n     * initialization step. This is essential to configure modules that are added through upgrades and that require\\n     * initialization.\\n     *\\n     * Note that versions can jump in increments greater than 1; this implies that if multiple reinitializers coexist in\\n     * a contract, executing them in the right order is up to the developer or operator.\\n     */\\n    modifier reinitializer(uint8 version) {\\n        require(!_initializing && _initialized < version, \\\"Initializable: contract is already initialized\\\");\\n        _initialized = version;\\n        _initializing = true;\\n        _;\\n        _initializing = false;\\n        emit Initialized(version);\\n    }\\n\\n    /**\\n     * @dev Modifier to protect an initialization function so that it can only be invoked by functions with the\\n     * {initializer} and {reinitializer} modifiers, directly or indirectly.\\n     */\\n    modifier onlyInitializing() {\\n        require(_initializing, \\\"Initializable: contract is not initializing\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Locks the contract, preventing any future reinitialization. This cannot be part of an initializer call.\\n     * Calling this in the constructor of a contract will prevent that contract from being initialized or reinitialized\\n     * to any version. It is recommended to use this to lock implementation contracts that are designed to be called\\n     * through proxies.\\n     */\\n    function _disableInitializers() internal virtual {\\n        require(!_initializing, \\\"Initializable: contract is initializing\\\");\\n        if (_initialized < type(uint8).max) {\\n            _initialized = type(uint8).max;\\n            emit Initialized(type(uint8).max);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x0203dcadc5737d9ef2c211d6fa15d18ebc3b30dfa51903b64870b01a062b0b4e\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.7.0) (utils/Address.sol)\\n\\npragma solidity ^0.8.1;\\n\\n/**\\n * @dev Collection of functions related to the address type\\n */\\nlibrary AddressUpgradeable {\\n    /**\\n     * @dev Returns true if `account` is a contract.\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * It is unsafe to assume that an address for which this function returns\\n     * false is an externally-owned account (EOA) and not a contract.\\n     *\\n     * Among others, `isContract` will return false for the following\\n     * types of addresses:\\n     *\\n     *  - an externally-owned account\\n     *  - a contract in construction\\n     *  - an address where a contract will be created\\n     *  - an address where a contract lived, but was destroyed\\n     * ====\\n     *\\n     * [IMPORTANT]\\n     * ====\\n     * You shouldn't rely on `isContract` to protect against flash loan attacks!\\n     *\\n     * Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets\\n     * like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract\\n     * constructor.\\n     * ====\\n     */\\n    function isContract(address account) internal view returns (bool) {\\n        // This method relies on extcodesize/address.code.length, which returns 0\\n        // for contracts in construction, since the code is only stored at the end\\n        // of the constructor execution.\\n\\n        return account.code.length > 0;\\n    }\\n\\n    /**\\n     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to\\n     * `recipient`, forwarding all available gas and reverting on errors.\\n     *\\n     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\\n     * of certain opcodes, possibly making contracts go over the 2300 gas limit\\n     * imposed by `transfer`, making them unable to receive funds via\\n     * `transfer`. {sendValue} removes this limitation.\\n     *\\n     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].\\n     *\\n     * IMPORTANT: because control is transferred to `recipient`, care must be\\n     * taken to not create reentrancy vulnerabilities. Consider using\\n     * {ReentrancyGuard} or the\\n     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].\\n     */\\n    function sendValue(address payable recipient, uint256 amount) internal {\\n        require(address(this).balance >= amount, \\\"Address: insufficient balance\\\");\\n\\n        (bool success, ) = recipient.call{value: amount}(\\\"\\\");\\n        require(success, \\\"Address: unable to send value, recipient may have reverted\\\");\\n    }\\n\\n    /**\\n     * @dev Performs a Solidity function call using a low level `call`. A\\n     * plain `call` is an unsafe replacement for a function call: use this\\n     * function instead.\\n     *\\n     * If `target` reverts with a revert reason, it is bubbled up by this\\n     * function (like regular Solidity function calls).\\n     *\\n     * Returns the raw returned data. To convert to the expected return value,\\n     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\\n     *\\n     * Requirements:\\n     *\\n     * - `target` must be a contract.\\n     * - calling `target` with `data` must not revert.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(address target, bytes memory data) internal returns (bytes memory) {\\n        return functionCall(target, data, \\\"Address: low-level call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\\n     * `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, 0, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but also transferring `value` wei to `target`.\\n     *\\n     * Requirements:\\n     *\\n     * - the calling contract must have an ETH balance of at least `value`.\\n     * - the called Solidity function must be `payable`.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value\\n    ) internal returns (bytes memory) {\\n        return functionCallWithValue(target, data, value, \\\"Address: low-level call with value failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\\n     * with `errorMessage` as a fallback revert reason when `target` reverts.\\n     *\\n     * _Available since v3.1._\\n     */\\n    function functionCallWithValue(\\n        address target,\\n        bytes memory data,\\n        uint256 value,\\n        string memory errorMessage\\n    ) internal returns (bytes memory) {\\n        require(address(this).balance >= value, \\\"Address: insufficient balance for call\\\");\\n        require(isContract(target), \\\"Address: call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.call{value: value}(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {\\n        return functionStaticCall(target, data, \\\"Address: low-level static call failed\\\");\\n    }\\n\\n    /**\\n     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\\n     * but performing a static call.\\n     *\\n     * _Available since v3.3._\\n     */\\n    function functionStaticCall(\\n        address target,\\n        bytes memory data,\\n        string memory errorMessage\\n    ) internal view returns (bytes memory) {\\n        require(isContract(target), \\\"Address: static call to non-contract\\\");\\n\\n        (bool success, bytes memory returndata) = target.staticcall(data);\\n        return verifyCallResult(success, returndata, errorMessage);\\n    }\\n\\n    /**\\n     * @dev Tool to verifies that a low level call was successful, and revert if it wasn't, either by bubbling the\\n     * revert reason using the provided one.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function verifyCallResult(\\n        bool success,\\n        bytes memory returndata,\\n        string memory errorMessage\\n    ) internal pure returns (bytes memory) {\\n        if (success) {\\n            return returndata;\\n        } else {\\n            // Look for revert reason and bubble it up if present\\n            if (returndata.length > 0) {\\n                // The easiest way to bubble the revert reason is using memory via assembly\\n                /// @solidity memory-safe-assembly\\n                assembly {\\n                    let returndata_size := mload(returndata)\\n                    revert(add(32, returndata), returndata_size)\\n                }\\n            } else {\\n                revert(errorMessage);\\n            }\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x611aa3f23e59cfdd1863c536776407b3e33d695152a266fa7cfb34440a29a8a3\",\"license\":\"MIT\"},\"@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\nimport \\\"../proxy/utils/Initializable.sol\\\";\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract ContextUpgradeable is Initializable {\\n    function __Context_init() internal onlyInitializing {\\n    }\\n\\n    function __Context_init_unchained() internal onlyInitializing {\\n    }\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    /**\\n     * @dev This empty reserved space is put in place to allow future versions to add new\\n     * variables without shifting down storage in the inheritance chain.\\n     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps\\n     */\\n    uint256[50] private __gap;\\n}\\n\",\"keccak256\":\"0x963ea7f0b48b032eef72fe3a7582edf78408d6f834115b9feadd673a4d5bd149\",\"license\":\"MIT\"},\"contracts/royalty/RoyaltyRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.4;\\n\\nimport \\\"./RoyaltyStorage.sol\\\";\\n\\ncontract RoyaltyRegistry is RoyaltyStorage {\\n    /// @dev emitted when royalties set for token.\\n    event RoyaltySetForCollection(address indexed _token, uint96 _oldRoyaltyRate, uint96 _royaltyRate);\\n\\n    event ReceiverUpdated(address oldReceiver, address newReceiver);\\n\\n    event DefaultRoyaltyRatePercentageUpdated(uint96 oldRate, uint96 newRate);\\n\\n    /**\\n     * @notice Initialization for upgradeable contract.\\n     *\\n     * @param _receiver receiver address.\\n     * @param _defaultRateRoyaltyPercentage default royalty percentage.\\n     *\\n     */\\n    function initialize(address _receiver, uint96 _defaultRateRoyaltyPercentage) external initializer {\\n        receiver = _receiver;\\n        defaultRoyaltyRatePercentage = _defaultRateRoyaltyPercentage;\\n        __Ownable_init_unchained();\\n    }\\n\\n    /**\\n     * @dev setter for receiver address.\\n     *\\n     * @param _newReceiver new Receiver address\\n     *\\n     */\\n    function changeReceiver(address _newReceiver) external onlyOwner {\\n        require(_newReceiver != address(0), \\\"Invalid address\\\");\\n        address oldReceiver = receiver;\\n        receiver = _newReceiver;\\n\\n        emit ReceiverUpdated(oldReceiver, receiver);\\n    }\\n\\n    /**\\n     * @dev setter for defaultRoyaltyRatePercentage\\n     * @notice the deafult royalty rate can be 0.\\n     *\\n     * @param _newDefaultRate new default rate for royalty.\\n     *\\n     */\\n    function changeDefaultRoyaltyRatePercentage(uint96 _newDefaultRate) external onlyOwner {\\n        require(_newDefaultRate <= MAX_RATE_ROYALTY, \\\"Invalid Rate\\\");\\n        uint96 oldDefaultRoyaltyRatePercentage = defaultRoyaltyRatePercentage;\\n        defaultRoyaltyRatePercentage = _newDefaultRate;\\n\\n        emit DefaultRoyaltyRatePercentageUpdated(oldDefaultRoyaltyRatePercentage, defaultRoyaltyRatePercentage);\\n    }\\n\\n    /**\\n     * @dev set royalty rate for specific collection. Support multiple set. The length of array between tokens & rates must exactly the same.\\n     * @notice the rate will be applied to all of token ids inside the collection.\\n     *\\n     * @param _tokens array of token address.\\n     * @param _royaltyRates array of royalty rates.\\n     */\\n    function setRoyaltyRateForCollections(address[] calldata _tokens, uint96[] calldata _royaltyRates)\\n        external\\n        onlyOwner\\n    {\\n        require(_tokens.length == _royaltyRates.length, \\\"Mismatch arguments length\\\");\\n\\n        for (uint256 i = 0; i < _tokens.length; i++) {\\n            _setRoyaltyForCollection(_tokens[i], _royaltyRates[i]);\\n        }\\n    }\\n\\n    /**\\n     * @dev internal setter royalty rate for collection.\\n     *\\n     * @param _token token / collection address.\\n     * @param _royaltyRate royalty rate for that particular collection.\\n     */\\n    function _setRoyaltyForCollection(address _token, uint96 _royaltyRate) private {\\n        require(_token != address(0), \\\"Invalid token\\\");\\n        require(_royaltyRate <= MAX_RATE_ROYALTY, \\\"Invalid Rate\\\");\\n\\n        uint96 _oldRoyaltyRate = royaltyRateForCollection[_token];\\n\\n        royaltyRateForCollection[_token] = _royaltyRate;\\n\\n        emit RoyaltySetForCollection(_token, _oldRoyaltyRate, _royaltyRate);\\n    }\\n\\n    /**\\n     * @dev royalty info for specific token / collection.\\n     * @dev It will return custom rate for the token, otherwise will return the default one.\\n     *\\n     * @param _token address of token / collection.\\n     *\\n     * @return _receiver receiver address.\\n     * @return _royaltyRatePercentage royalty rate percentage.\\n     */\\n    function getRoyaltyInfo(address _token) external view returns (address _receiver, uint96 _royaltyRatePercentage) {\\n        return (\\n            receiver,\\n            royaltyRateForCollection[_token] > 0 ? royaltyRateForCollection[_token] : defaultRoyaltyRatePercentage\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0x95787fada3339dfe8b994a7acbf24ab2b6154d4d893b5821809111757caad204\",\"license\":\"MIT\"},\"contracts/royalty/RoyaltyStorage.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity 0.8.4;\\n\\nimport \\\"@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol\\\";\\n\\ncontract RoyaltyStorage is OwnableUpgradeable {\\n    /// @dev storing royalty amount percentages for particular collection.\\n    mapping(address => uint96) public royaltyRateForCollection;\\n\\n    /// @dev default royalty percentage;\\n    uint96 public defaultRoyaltyRatePercentage;\\n\\n    /// @dev receiver address of royalty.\\n    address public receiver;\\n\\n    uint96 public constant MAX_RATE_ROYALTY = 1000;\\n}\\n\",\"keccak256\":\"0x9b64e3f9013ec4f474a351fe4313a524ed90985749c6e2e95e32f1cd0abdc01e\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5061153d806100206000396000f3fe608060405234801561001057600080fd5b50600436106100b45760003560e01c80638ce6467d116100715780638ce6467d1461017c5780638da5cb5b14610198578063a99421d4146101b6578063f2a41374146101d2578063f2fde38b146101ee578063f7260d3e1461020a576100b4565b8063376a06f4146100b957806338f5b980146100ea5780633e6425db1461011a578063547e3f0614610138578063715018a6146101545780637b2e70081461015e575b600080fd5b6100d360048036038101906100ce9190610e0f565b610228565b6040516100e192919061109b565b60405180910390f35b61010460048036038101906100ff9190610e0f565b61033d565b60405161011191906111df565b60405180910390f35b610122610368565b60405161012f91906111df565b60405180910390f35b610152600480360381019061014d9190610e0f565b610386565b005b61015c6104c5565b005b6101666104d9565b60405161017391906111df565b60405180910390f35b61019660048036038101906101919190610ee9565b6104df565b005b6101a06105ef565b6040516101ad9190611057565b60405180910390f35b6101d060048036038101906101cb9190610e74565b610619565b005b6101ec60048036038101906101e79190610e38565b610735565b005b61020860048036038101906102039190610e0f565b6108e7565b005b61021261096b565b60405161021f9190611057565b60405180910390f35b6000806066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff166000606560008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff166bffffffffffffffffffffffff16116102db57606660009054906101000a90046bffffffffffffffffffffffff16610334565b606560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff165b91509150915091565b60656020528060005260406000206000915054906101000a90046bffffffffffffffffffffffff1681565b606660009054906101000a90046bffffffffffffffffffffffff1681565b61038e610991565b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156103fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016103f5906110df565b60405180910390fd5b60006066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff169050816066600c6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055507fbda2bcccbfa5ae883ab7d9f03480ab68fe68e9200c9b52c0c47abc21d2c90ec9816066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff166040516104b9929190611072565b60405180910390a15050565b6104cd610991565b6104d76000610a0f565b565b6103e881565b6104e7610991565b6103e86bffffffffffffffffffffffff16816bffffffffffffffffffffffff161115610548576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161053f9061115f565b60405180910390fd5b6000606660009054906101000a90046bffffffffffffffffffffffff16905081606660006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff1602179055507f7392c3db674e96a805158bdfac5363922c74a8241afb1eedc887ec13d02f521381606660009054906101000a90046bffffffffffffffffffffffff166040516105e39291906111fa565b60405180910390a15050565b6000603360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b610621610991565b818190508484905014610669576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106609061119f565b60405180910390fd5b60005b8484905081101561072e5761071b8585838181106106b3577f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b90506020020160208101906106c89190610e0f565b848484818110610701577f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b90506020020160208101906107169190610ee9565b610ad5565b8080610726906112a7565b91505061066c565b5050505050565b60008060019054906101000a900460ff161590508080156107665750600160008054906101000a900460ff1660ff16105b80610793575061077530610cc5565b1580156107925750600160008054906101000a900460ff1660ff16145b5b6107d2576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016107c99061113f565b60405180910390fd5b60016000806101000a81548160ff021916908360ff160217905550801561080f576001600060016101000a81548160ff0219169083151502179055505b826066600c6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555081606660006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff160217905550610889610ce8565b80156108e25760008060016101000a81548160ff0219169083151502179055507f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb384740249860016040516108d991906110c4565b60405180910390a15b505050565b6108ef610991565b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141561095f576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610956906110ff565b60405180910390fd5b61096881610a0f565b50565b6066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b610999610d49565b73ffffffffffffffffffffffffffffffffffffffff166109b76105ef565b73ffffffffffffffffffffffffffffffffffffffff1614610a0d576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610a049061117f565b60405180910390fd5b565b6000603360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905081603360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a35050565b600073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff161415610b45576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610b3c9061111f565b60405180910390fd5b6103e86bffffffffffffffffffffffff16816bffffffffffffffffffffffff161115610ba6576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610b9d9061115f565b60405180910390fd5b6000606560008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff16905081606560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff1602179055508273ffffffffffffffffffffffffffffffffffffffff167f320b64953fd1d3cb8ef81c3fc45474fb5454182c399dbe380e1be6b2a15f2f0c8284604051610cb89291906111fa565b60405180910390a2505050565b6000808273ffffffffffffffffffffffffffffffffffffffff163b119050919050565b600060019054906101000a900460ff16610d37576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610d2e906111bf565b60405180910390fd5b610d47610d42610d49565b610a0f565b565b600033905090565b600081359050610d60816114d9565b92915050565b60008083601f840112610d7857600080fd5b8235905067ffffffffffffffff811115610d9157600080fd5b602083019150836020820283011115610da957600080fd5b9250929050565b60008083601f840112610dc257600080fd5b8235905067ffffffffffffffff811115610ddb57600080fd5b602083019150836020820283011115610df357600080fd5b9250929050565b600081359050610e09816114f0565b92915050565b600060208284031215610e2157600080fd5b6000610e2f84828501610d51565b91505092915050565b60008060408385031215610e4b57600080fd5b6000610e5985828601610d51565b9250506020610e6a85828601610dfa565b9150509250929050565b60008060008060408587031215610e8a57600080fd5b600085013567ffffffffffffffff811115610ea457600080fd5b610eb087828801610d66565b9450945050602085013567ffffffffffffffff811115610ecf57600080fd5b610edb87828801610db0565b925092505092959194509250565b600060208284031215610efb57600080fd5b6000610f0984828501610dfa565b91505092915050565b610f1b81611234565b82525050565b610f2a81611295565b82525050565b6000610f3d600f83611223565b9150610f488261131f565b602082019050919050565b6000610f60602683611223565b9150610f6b82611348565b604082019050919050565b6000610f83600d83611223565b9150610f8e82611397565b602082019050919050565b6000610fa6602e83611223565b9150610fb1826113c0565b604082019050919050565b6000610fc9600c83611223565b9150610fd48261140f565b602082019050919050565b6000610fec602083611223565b9150610ff782611438565b602082019050919050565b600061100f601983611223565b915061101a82611461565b602082019050919050565b6000611032602b83611223565b915061103d8261148a565b604082019050919050565b6110518161127d565b82525050565b600060208201905061106c6000830184610f12565b92915050565b60006040820190506110876000830185610f12565b6110946020830184610f12565b9392505050565b60006040820190506110b06000830185610f12565b6110bd6020830184611048565b9392505050565b60006020820190506110d96000830184610f21565b92915050565b600060208201905081810360008301526110f881610f30565b9050919050565b6000602082019050818103600083015261111881610f53565b9050919050565b6000602082019050818103600083015261113881610f76565b9050919050565b6000602082019050818103600083015261115881610f99565b9050919050565b6000602082019050818103600083015261117881610fbc565b9050919050565b6000602082019050818103600083015261119881610fdf565b9050919050565b600060208201905081810360008301526111b881611002565b9050919050565b600060208201905081810360008301526111d881611025565b9050919050565b60006020820190506111f46000830184611048565b92915050565b600060408201905061120f6000830185611048565b61121c6020830184611048565b9392505050565b600082825260208201905092915050565b600061123f82611246565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000819050919050565b600060ff82169050919050565b60006bffffffffffffffffffffffff82169050919050565b60006112a082611270565b9050919050565b60006112b282611266565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8214156112e5576112e46112f0565b5b600182019050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b7f496e76616c696420616464726573730000000000000000000000000000000000600082015250565b7f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160008201527f6464726573730000000000000000000000000000000000000000000000000000602082015250565b7f496e76616c696420746f6b656e00000000000000000000000000000000000000600082015250565b7f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160008201527f647920696e697469616c697a6564000000000000000000000000000000000000602082015250565b7f496e76616c696420526174650000000000000000000000000000000000000000600082015250565b7f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572600082015250565b7f4d69736d6174636820617267756d656e7473206c656e67746800000000000000600082015250565b7f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960008201527f6e697469616c697a696e67000000000000000000000000000000000000000000602082015250565b6114e281611234565b81146114ed57600080fd5b50565b6114f98161127d565b811461150457600080fd5b5056fea26469706673582212202150061e2be37e46ad58561b1d888262a23cfabecca44c1fc88b61d860cabe3564736f6c63430008040033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100b45760003560e01c80638ce6467d116100715780638ce6467d1461017c5780638da5cb5b14610198578063a99421d4146101b6578063f2a41374146101d2578063f2fde38b146101ee578063f7260d3e1461020a576100b4565b8063376a06f4146100b957806338f5b980146100ea5780633e6425db1461011a578063547e3f0614610138578063715018a6146101545780637b2e70081461015e575b600080fd5b6100d360048036038101906100ce9190610e0f565b610228565b6040516100e192919061109b565b60405180910390f35b61010460048036038101906100ff9190610e0f565b61033d565b60405161011191906111df565b60405180910390f35b610122610368565b60405161012f91906111df565b60405180910390f35b610152600480360381019061014d9190610e0f565b610386565b005b61015c6104c5565b005b6101666104d9565b60405161017391906111df565b60405180910390f35b61019660048036038101906101919190610ee9565b6104df565b005b6101a06105ef565b6040516101ad9190611057565b60405180910390f35b6101d060048036038101906101cb9190610e74565b610619565b005b6101ec60048036038101906101e79190610e38565b610735565b005b61020860048036038101906102039190610e0f565b6108e7565b005b61021261096b565b60405161021f9190611057565b60405180910390f35b6000806066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff166000606560008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff166bffffffffffffffffffffffff16116102db57606660009054906101000a90046bffffffffffffffffffffffff16610334565b606560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff165b91509150915091565b60656020528060005260406000206000915054906101000a90046bffffffffffffffffffffffff1681565b606660009054906101000a90046bffffffffffffffffffffffff1681565b61038e610991565b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156103fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016103f5906110df565b60405180910390fd5b60006066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff169050816066600c6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055507fbda2bcccbfa5ae883ab7d9f03480ab68fe68e9200c9b52c0c47abc21d2c90ec9816066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff166040516104b9929190611072565b60405180910390a15050565b6104cd610991565b6104d76000610a0f565b565b6103e881565b6104e7610991565b6103e86bffffffffffffffffffffffff16816bffffffffffffffffffffffff161115610548576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161053f9061115f565b60405180910390fd5b6000606660009054906101000a90046bffffffffffffffffffffffff16905081606660006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff1602179055507f7392c3db674e96a805158bdfac5363922c74a8241afb1eedc887ec13d02f521381606660009054906101000a90046bffffffffffffffffffffffff166040516105e39291906111fa565b60405180910390a15050565b6000603360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b610621610991565b818190508484905014610669576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106609061119f565b60405180910390fd5b60005b8484905081101561072e5761071b8585838181106106b3577f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b90506020020160208101906106c89190610e0f565b848484818110610701577f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b90506020020160208101906107169190610ee9565b610ad5565b8080610726906112a7565b91505061066c565b5050505050565b60008060019054906101000a900460ff161590508080156107665750600160008054906101000a900460ff1660ff16105b80610793575061077530610cc5565b1580156107925750600160008054906101000a900460ff1660ff16145b5b6107d2576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016107c99061113f565b60405180910390fd5b60016000806101000a81548160ff021916908360ff160217905550801561080f576001600060016101000a81548160ff0219169083151502179055505b826066600c6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555081606660006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff160217905550610889610ce8565b80156108e25760008060016101000a81548160ff0219169083151502179055507f7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb384740249860016040516108d991906110c4565b60405180910390a15b505050565b6108ef610991565b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141561095f576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610956906110ff565b60405180910390fd5b61096881610a0f565b50565b6066600c9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b610999610d49565b73ffffffffffffffffffffffffffffffffffffffff166109b76105ef565b73ffffffffffffffffffffffffffffffffffffffff1614610a0d576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610a049061117f565b60405180910390fd5b565b6000603360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905081603360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508173ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a35050565b600073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff161415610b45576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610b3c9061111f565b60405180910390fd5b6103e86bffffffffffffffffffffffff16816bffffffffffffffffffffffff161115610ba6576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610b9d9061115f565b60405180910390fd5b6000606560008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060009054906101000a90046bffffffffffffffffffffffff16905081606560008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060006101000a8154816bffffffffffffffffffffffff02191690836bffffffffffffffffffffffff1602179055508273ffffffffffffffffffffffffffffffffffffffff167f320b64953fd1d3cb8ef81c3fc45474fb5454182c399dbe380e1be6b2a15f2f0c8284604051610cb89291906111fa565b60405180910390a2505050565b6000808273ffffffffffffffffffffffffffffffffffffffff163b119050919050565b600060019054906101000a900460ff16610d37576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610d2e906111bf565b60405180910390fd5b610d47610d42610d49565b610a0f565b565b600033905090565b600081359050610d60816114d9565b92915050565b60008083601f840112610d7857600080fd5b8235905067ffffffffffffffff811115610d9157600080fd5b602083019150836020820283011115610da957600080fd5b9250929050565b60008083601f840112610dc257600080fd5b8235905067ffffffffffffffff811115610ddb57600080fd5b602083019150836020820283011115610df357600080fd5b9250929050565b600081359050610e09816114f0565b92915050565b600060208284031215610e2157600080fd5b6000610e2f84828501610d51565b91505092915050565b60008060408385031215610e4b57600080fd5b6000610e5985828601610d51565b9250506020610e6a85828601610dfa565b9150509250929050565b60008060008060408587031215610e8a57600080fd5b600085013567ffffffffffffffff811115610ea457600080fd5b610eb087828801610d66565b9450945050602085013567ffffffffffffffff811115610ecf57600080fd5b610edb87828801610db0565b925092505092959194509250565b600060208284031215610efb57600080fd5b6000610f0984828501610dfa565b91505092915050565b610f1b81611234565b82525050565b610f2a81611295565b82525050565b6000610f3d600f83611223565b9150610f488261131f565b602082019050919050565b6000610f60602683611223565b9150610f6b82611348565b604082019050919050565b6000610f83600d83611223565b9150610f8e82611397565b602082019050919050565b6000610fa6602e83611223565b9150610fb1826113c0565b604082019050919050565b6000610fc9600c83611223565b9150610fd48261140f565b602082019050919050565b6000610fec602083611223565b9150610ff782611438565b602082019050919050565b600061100f601983611223565b915061101a82611461565b602082019050919050565b6000611032602b83611223565b915061103d8261148a565b604082019050919050565b6110518161127d565b82525050565b600060208201905061106c6000830184610f12565b92915050565b60006040820190506110876000830185610f12565b6110946020830184610f12565b9392505050565b60006040820190506110b06000830185610f12565b6110bd6020830184611048565b9392505050565b60006020820190506110d96000830184610f21565b92915050565b600060208201905081810360008301526110f881610f30565b9050919050565b6000602082019050818103600083015261111881610f53565b9050919050565b6000602082019050818103600083015261113881610f76565b9050919050565b6000602082019050818103600083015261115881610f99565b9050919050565b6000602082019050818103600083015261117881610fbc565b9050919050565b6000602082019050818103600083015261119881610fdf565b9050919050565b600060208201905081810360008301526111b881611002565b9050919050565b600060208201905081810360008301526111d881611025565b9050919050565b60006020820190506111f46000830184611048565b92915050565b600060408201905061120f6000830185611048565b61121c6020830184611048565b9392505050565b600082825260208201905092915050565b600061123f82611246565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000819050919050565b600060ff82169050919050565b60006bffffffffffffffffffffffff82169050919050565b60006112a082611270565b9050919050565b60006112b282611266565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8214156112e5576112e46112f0565b5b600182019050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b7f496e76616c696420616464726573730000000000000000000000000000000000600082015250565b7f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160008201527f6464726573730000000000000000000000000000000000000000000000000000602082015250565b7f496e76616c696420746f6b656e00000000000000000000000000000000000000600082015250565b7f496e697469616c697a61626c653a20636f6e747261637420697320616c72656160008201527f647920696e697469616c697a6564000000000000000000000000000000000000602082015250565b7f496e76616c696420526174650000000000000000000000000000000000000000600082015250565b7f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572600082015250565b7f4d69736d6174636820617267756d656e7473206c656e67746800000000000000600082015250565b7f496e697469616c697a61626c653a20636f6e7472616374206973206e6f74206960008201527f6e697469616c697a696e67000000000000000000000000000000000000000000602082015250565b6114e281611234565b81146114ed57600080fd5b50565b6114f98161127d565b811461150457600080fd5b5056fea26469706673582212202150061e2be37e46ad58561b1d888262a23cfabecca44c1fc88b61d860cabe3564736f6c63430008040033",
+  "devdoc": {
+    "events": {
+      "RoyaltySetForCollection(address,uint96,uint96)": {
+        "details": "emitted when royalties set for token."
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "changeDefaultRoyaltyRatePercentage(uint96)": {
+        "details": "setter for defaultRoyaltyRatePercentage",
+        "params": {
+          "_newDefaultRate": "new default rate for royalty."
+        }
+      },
+      "changeReceiver(address)": {
+        "details": "setter for receiver address.",
+        "params": {
+          "_newReceiver": "new Receiver address"
+        }
+      },
+      "getRoyaltyInfo(address)": {
+        "details": "royalty info for specific token / collection.It will return custom rate for the token, otherwise will return the default one.",
+        "params": {
+          "_token": "address of token / collection."
+        },
+        "returns": {
+          "_receiver": "receiver address.",
+          "_royaltyRatePercentage": "royalty rate percentage."
+        }
+      },
+      "initialize(address,uint96)": {
+        "params": {
+          "_defaultRateRoyaltyPercentage": "default royalty percentage.",
+          "_receiver": "receiver address."
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "setRoyaltyRateForCollections(address[],uint96[])": {
+        "details": "set royalty rate for specific collection. Support multiple set. The length of array between tokens & rates must exactly the same.",
+        "params": {
+          "_royaltyRates": "array of royalty rates.",
+          "_tokens": "array of token address."
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "changeDefaultRoyaltyRatePercentage(uint96)": {
+        "notice": "the deafult royalty rate can be 0."
+      },
+      "initialize(address,uint96)": {
+        "notice": "Initialization for upgradeable contract."
+      },
+      "setRoyaltyRateForCollections(address[],uint96[])": {
+        "notice": "the rate will be applied to all of token ids inside the collection."
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 138,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "_initialized",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_uint8"
+      },
+      {
+        "astId": 141,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "_initializing",
+        "offset": 1,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 566,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_uint256)50_storage"
+      },
+      {
+        "astId": 10,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "51",
+        "type": "t_address"
+      },
+      {
+        "astId": 130,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "__gap",
+        "offset": 0,
+        "slot": "52",
+        "type": "t_array(t_uint256)49_storage"
+      },
+      {
+        "astId": 3612,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "royaltyRateForCollection",
+        "offset": 0,
+        "slot": "101",
+        "type": "t_mapping(t_address,t_uint96)"
+      },
+      {
+        "astId": 3615,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "defaultRoyaltyRatePercentage",
+        "offset": 0,
+        "slot": "102",
+        "type": "t_uint96"
+      },
+      {
+        "astId": 3618,
+        "contract": "contracts/royalty/RoyaltyRegistry.sol:RoyaltyRegistry",
+        "label": "receiver",
+        "offset": 12,
+        "slot": "102",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint256)49_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[49]",
+        "numberOfBytes": "1568"
+      },
+      "t_array(t_uint256)50_storage": {
+        "base": "t_uint256",
+        "encoding": "inplace",
+        "label": "uint256[50]",
+        "numberOfBytes": "1600"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_uint96)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint96)",
+        "numberOfBytes": "32",
+        "value": "t_uint96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      },
+      "t_uint96": {
+        "encoding": "inplace",
+        "label": "uint96",
+        "numberOfBytes": "12"
+      }
+    }
+  }
+}
