@@ -5,11 +5,18 @@ import "./RoyaltyStorage.sol";
 
 contract RoyaltyRegistry is RoyaltyStorage {
     /// @dev emitted when royalties set for token.
-    event RoyaltySetForCollection(address indexed _token, uint96 _oldRoyaltyRate, uint96 _royaltyRate);
+    event RoyaltySetForCollection(address indexed _token, uint96 _royaltyRate);
 
     event ReceiverUpdated(address oldReceiver, address newReceiver);
 
+    event ModelFactoryUpdated(address oldFactory, address newFactory);
+
     event DefaultRoyaltyRatePercentageUpdated(uint96 oldRate, uint96 newRate);
+
+    modifier onlyOwnerOrFactory() {
+        require(msg.sender == owner() || msg.sender == modelFactory, "Unauthorized");
+        _;
+    }
 
     /**
      * @notice Initialization for upgradeable contract.
@@ -39,6 +46,20 @@ contract RoyaltyRegistry is RoyaltyStorage {
     }
 
     /**
+     * @dev setter for model factory address.
+     *
+     * @param _newModelFactory new Receiver address
+     *
+     */
+    function changeModelFactory(address _newModelFactory) external onlyOwner {
+        require(_newModelFactory != address(0), "Invalid address");
+        address oldModelFactory = modelFactory;
+        modelFactory = _newModelFactory;
+
+        emit ModelFactoryUpdated(oldModelFactory, modelFactory);
+    }
+
+    /**
      * @dev setter for defaultRoyaltyRatePercentage
      * @notice the deafult royalty rate can be 0.
      *
@@ -56,6 +77,7 @@ contract RoyaltyRegistry is RoyaltyStorage {
     /**
      * @dev set royalty rate for specific collection. Support multiple set. The length of array between tokens & rates must exactly the same.
      * @notice the rate will be applied to all of token ids inside the collection.
+     * @notice only owner can call the multiple set.
      *
      * @param _tokens array of token address.
      * @param _royaltyRates array of royalty rates.
@@ -72,6 +94,18 @@ contract RoyaltyRegistry is RoyaltyStorage {
     }
 
     /**
+     * @dev set royalty rate for specific collection. Support multiple set. The length of array between tokens & rates must exactly the same.
+     * @notice the rate will be applied to all of token ids inside the collection.
+     * @notice Owner or factory can perform this function call.
+     *
+     * @param _token token address.
+     * @param _royaltyRate royalty rate.
+     */
+    function setRoyaltyRateForCollection(address _token, uint96 _royaltyRate) external onlyOwnerOrFactory {
+        _setRoyaltyForCollection(_token, _royaltyRate);
+    }
+
+    /**
      * @dev internal setter royalty rate for collection.
      *
      * @param _token token / collection address.
@@ -81,11 +115,11 @@ contract RoyaltyRegistry is RoyaltyStorage {
         require(_token != address(0), "Invalid token");
         require(_royaltyRate <= MAX_RATE_ROYALTY, "Invalid Rate");
 
-        uint96 _oldRoyaltyRate = royaltyRateForCollection[_token];
+        RoyaltySet memory _royaltySet = RoyaltySet({ isSet: true, royaltyRateForCollection: _royaltyRate });
 
-        royaltyRateForCollection[_token] = _royaltyRate;
+        royaltiesSet[_token] = _royaltySet;
 
-        emit RoyaltySetForCollection(_token, _oldRoyaltyRate, _royaltyRate);
+        emit RoyaltySetForCollection(_token, _royaltyRate);
     }
 
     /**
@@ -98,9 +132,7 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @return _royaltyRatePercentage royalty rate percentage.
      */
     function getRoyaltyInfo(address _token) external view returns (address _receiver, uint96 _royaltyRatePercentage) {
-        return (
-            receiver,
-            royaltyRateForCollection[_token] > 0 ? royaltyRateForCollection[_token] : defaultRoyaltyRatePercentage
-        );
+        RoyaltySet memory _royaltySet = royaltiesSet[_token];
+        return (receiver, _royaltySet.isSet ? _royaltySet.royaltyRateForCollection : defaultRoyaltyRatePercentage);
     }
 }

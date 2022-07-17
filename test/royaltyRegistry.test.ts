@@ -113,6 +113,16 @@ describe("ModelNFTFactory", async () => {
       );
     });
 
+    it("update model factory address", async () => {
+      const tx = await royaltyRegistry.changeModelFactory(bob.address);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "ModelFactoryUpdated")
+        .withArgs(AddressZero, bob.address);
+
+      expect(await royaltyRegistry.modelFactory()).to.equal(bob.address);
+    });
+
     it("update default royalty rate to the max", async () => {
       const MAX_RATE = await royaltyRegistry.MAX_RATE_ROYALTY();
       const tx = await royaltyRegistry.changeDefaultRoyaltyRatePercentage(
@@ -141,6 +151,18 @@ describe("ModelNFTFactory", async () => {
           royaltyRegistry.changeDefaultRoyaltyRatePercentage(MAX_RATE.add(1))
         ).to.be.revertedWith("Invalid Rate");
       });
+
+      it("should revert try to update model factory to zero address", async () => {
+        await expect(
+          royaltyRegistry.changeModelFactory(AddressZero)
+        ).to.be.revertedWith("Invalid address");
+      });
+
+      it("should revert try to update model factory with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeModelFactory(AddressZero)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
     });
   });
 
@@ -164,7 +186,7 @@ describe("ModelNFTFactory", async () => {
 
       await expect(tx)
         .to.emit(royaltyRegistry, "RoyaltySetForCollection")
-        .withArgs(mockModel.address, 0, NEW_RATE);
+        .withArgs(mockModel.address, NEW_RATE);
 
       const [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
         mockModel.address
@@ -182,6 +204,63 @@ describe("ModelNFTFactory", async () => {
       await expect(amountRoyalty).to.equal(
         salePrice.mul(NEW_RATE).div(royaltyFeeDenominator)
       );
+    });
+
+    it("should be able to set royalty for specific collection with 0 rate", async () => {
+      const salePrice = BigNumber.from(2000);
+      let [receiverRoyalty, amountRoyalty] = await mockModel.royaltyInfo(
+        0,
+        salePrice
+      );
+      await expect(receiverRoyalty).to.equal(royaltyReceiver.address);
+      await expect(amountRoyalty).to.equal(
+        salePrice.mul(RATE).div(royaltyFeeDenominator)
+      );
+
+      let royaltySet = await royaltyRegistry.royaltiesSet(mockModel.address);
+      let royaltyInfoFromRegistry = await royaltyRegistry.getRoyaltyInfo(
+        mockModel.address
+      );
+      expect(royaltySet[0]).to.equal(false);
+      expect(royaltySet[1]).to.equal(0);
+      expect(royaltyInfoFromRegistry[0]).to.equal(royaltyReceiver.address);
+      expect(royaltyInfoFromRegistry[1]).to.equal(RATE);
+
+      const NEW_RATE = BigNumber.from(0);
+      const tx = await royaltyRegistry.setRoyaltyRateForCollections(
+        [mockModel.address],
+        [NEW_RATE]
+      );
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "RoyaltySetForCollection")
+        .withArgs(mockModel.address, NEW_RATE);
+
+      const [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
+        mockModel.address
+      );
+
+      await expect(receiver).to.equal(royaltyReceiver.address);
+      await expect(rate).to.equal(NEW_RATE);
+
+      [receiverRoyalty, amountRoyalty] = await mockModel.royaltyInfo(
+        0,
+        salePrice
+      );
+
+      await expect(receiverRoyalty).to.equal(royaltyReceiver.address);
+      await expect(amountRoyalty).to.equal(
+        salePrice.mul(NEW_RATE).div(royaltyFeeDenominator)
+      );
+
+      royaltySet = await royaltyRegistry.royaltiesSet(mockModel.address);
+      royaltyInfoFromRegistry = await royaltyRegistry.getRoyaltyInfo(
+        mockModel.address
+      );
+      expect(royaltySet[0]).to.equal(true);
+      expect(royaltySet[1]).to.equal(NEW_RATE);
+      expect(royaltyInfoFromRegistry[0]).to.equal(royaltyReceiver.address);
+      expect(royaltyInfoFromRegistry[1]).to.equal(NEW_RATE);
     });
 
     it("should be able to set royalty for multiple collection", async () => {
@@ -206,11 +285,11 @@ describe("ModelNFTFactory", async () => {
 
       await expect(tx)
         .to.emit(royaltyRegistry, "RoyaltySetForCollection")
-        .withArgs(mockModel.address, 0, NEW_RATE);
+        .withArgs(mockModel.address, NEW_RATE);
 
       await expect(tx)
         .to.emit(royaltyRegistry, "RoyaltySetForCollection")
-        .withArgs(mockModel2.address, 0, NEW_RATE2);
+        .withArgs(mockModel2.address, NEW_RATE2);
 
       let [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
         mockModel.address
@@ -267,6 +346,14 @@ describe("ModelNFTFactory", async () => {
             [MAX_RATE.add(1)]
           )
         ).to.be.revertedWith("Invalid Rate");
+      });
+
+      it("should revert for non-authorized call", async () => {
+        await expect(
+          royaltyRegistry
+            .connect(bob)
+            .setRoyaltyRateForCollection(mockModel.address, RATE)
+        ).to.be.revertedWith("Unauthorized");
       });
     });
   });
