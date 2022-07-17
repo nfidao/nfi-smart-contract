@@ -5,7 +5,10 @@ import { ethers, upgrades, waffle } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
 import { ModelNFTFactory, RoyaltyRegistry } from "../typechain";
 
-const { getContractFactory } = ethers;
+const {
+  constants: { AddressZero },
+  getContractFactory,
+} = ethers;
 
 describe("ModelNFTFactory", async () => {
   let deployer: SignerWithAddress;
@@ -37,10 +40,13 @@ describe("ModelNFTFactory", async () => {
 
     modelNFTFactory = (await upgrades.deployProxy(
       await getContractFactory("ModelNFTFactory", deployer),
+      [royaltyRegistry.address],
       {
         initializer: "initialize",
       }
     )) as ModelNFTFactory;
+
+    await royaltyRegistry.changeModelFactory(modelNFTFactory.address);
 
     return [modelNFTFactory, royaltyRegistry];
   };
@@ -67,6 +73,7 @@ describe("ModelNFTFactory", async () => {
           manager.address,
           signer.address,
           royaltyRegistry.address,
+          RATE,
           MODEL_LIMIT
         );
 
@@ -76,7 +83,46 @@ describe("ModelNFTFactory", async () => {
         .withArgs(MODEL_ID, modelNFTAddress);
     });
 
+    it("should be able to create modelNFT with 0 royalty rate", async () => {
+      const tx = await modelNFTFactory
+        .connect(bob)
+        .createModelNFT(
+          MODEL_NAME,
+          MODEL_ID,
+          designer.address,
+          manager.address,
+          signer.address,
+          royaltyRegistry.address,
+          0,
+          MODEL_LIMIT
+        );
+
+      const modelNFTAddress = await modelNFTFactory.modelNFTs(MODEL_ID);
+      await expect(tx)
+        .to.emit(modelNFTFactory, "NFTCreated")
+        .withArgs(MODEL_ID, modelNFTAddress);
+
+      const ModelNFT = await getContractFactory("ModelNFT");
+      const modelNFT = await ModelNFT.attach(modelNFTAddress);
+      expect(await modelNFT.symbol()).to.equal(MODEL_ID);
+
+      const royaltyInfo = await modelNFT.royaltyInfo(0, 10);
+      expect(royaltyInfo[1]).to.equal(0);
+    });
+
     describe("revert", () => {
+      it("should revert if royalty registry is zero address", async () => {
+        await expect(
+          upgrades.deployProxy(
+            await getContractFactory("ModelNFTFactory", deployer),
+            [AddressZero],
+            {
+              initializer: "initialize",
+            }
+          )
+        ).to.been.revertedWith("Invalid royalty address");
+      });
+
       it("should revert if limit is zero", async () => {
         await expect(
           modelNFTFactory
@@ -88,6 +134,7 @@ describe("ModelNFTFactory", async () => {
               manager.address,
               signer.address,
               royaltyRegistry.address,
+              RATE,
               0
             )
         ).to.been.revertedWith("Invalid mint limit");
@@ -103,6 +150,7 @@ describe("ModelNFTFactory", async () => {
             manager.address,
             signer.address,
             royaltyRegistry.address,
+            RATE,
             MODEL_LIMIT
           );
         await expect(
@@ -115,6 +163,7 @@ describe("ModelNFTFactory", async () => {
               manager.address,
               signer.address,
               royaltyRegistry.address,
+              RATE,
               MODEL_LIMIT
             )
         ).to.been.revertedWith("Model ID has been used");
