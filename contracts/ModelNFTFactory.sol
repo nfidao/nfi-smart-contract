@@ -12,10 +12,11 @@ contract ModelNFTFactory is OwnableUpgradeable {
     mapping(string => address) public modelNFTs;
 
     /// @dev royalty registry address that store the royalty info.
-    IRoyaltyRegistry public royaltyRegistry;
+    IRoyaltyRegistry public factoryRoyaltyRegistry;
 
     // Event
     event NFTCreated(string indexed modelID, address modelNFTAddress);
+    event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
 
     /**
      * @dev initialization function for proxy.
@@ -24,8 +25,20 @@ contract ModelNFTFactory is OwnableUpgradeable {
      */
     function initialize(address _royaltyRegistry) public initializer {
         require(_royaltyRegistry != address(0), "Invalid royalty address");
-        royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
+        factoryRoyaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
         __Ownable_init_unchained();
+    }
+
+    /**
+     * @dev Update the royalty registry address.
+     *
+     * @param _royaltyRegistry new royalty registry address.
+     */
+    function changeFactoryRoyaltyRegistry(address _royaltyRegistry) external onlyOwner {
+        require(_royaltyRegistry != address(0), "Invalid address");
+        address oldRoyaltyRegistry = address(factoryRoyaltyRegistry);
+        factoryRoyaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
+        emit RoyaltyRegistryUpdated(msg.sender, oldRoyaltyRegistry, address(factoryRoyaltyRegistry));
     }
 
     /**
@@ -54,7 +67,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
 
         _modelNFT = new ModelNFT(_modelName, _modelID, _mintLimit, _designer, _manager, _signer, _royaltyRegistry);
 
-        royaltyRegistry.setRoyaltyRateForCollection(address(_modelNFT), _royaltyRate);
+        factoryRoyaltyRegistry.setRoyaltyRateForCollection(address(_modelNFT), _royaltyRate);
 
         modelNFTs[_modelID] = address(_modelNFT);
 
