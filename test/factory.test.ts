@@ -110,6 +110,32 @@ describe("ModelNFTFactory", async () => {
       expect(royaltyInfo[1]).to.equal(0);
     });
 
+    it("update royalty registry address", async () => {
+      const RoyaltyRegistry = await getContractFactory(
+        "RoyaltyRegistry",
+        deployer
+      );
+
+      const newRoyaltyRegistry =
+        (await RoyaltyRegistry.deploy()) as RoyaltyRegistry;
+
+      const tx = await modelNFTFactory.changeFactoryRoyaltyRegistry(
+        newRoyaltyRegistry.address
+      );
+
+      await expect(tx)
+        .to.emit(modelNFTFactory, "RoyaltyRegistryUpdated")
+        .withArgs(
+          deployer.address,
+          royaltyRegistry.address,
+          newRoyaltyRegistry.address
+        );
+
+      expect(await modelNFTFactory.factoryRoyaltyRegistry()).to.equal(
+        newRoyaltyRegistry.address
+      );
+    });
+
     describe("revert", () => {
       it("should revert if royalty registry is zero address", async () => {
         await expect(
