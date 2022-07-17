@@ -166,7 +166,7 @@ contract ModelNFT is ERC2981, ERC721A {
     }
 
     /**
-     * @dev Update the authorized signer address.
+     * @dev Update the royalty registry address.
      *
      * @param _royaltyRegistry new royalty registry address.
      */

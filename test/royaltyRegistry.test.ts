@@ -158,6 +158,18 @@ describe("ModelNFTFactory", async () => {
         ).to.be.revertedWith("Invalid address");
       });
 
+      it("should revert try to update receiver with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeReceiver(bob.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update default rate with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeDefaultRoyaltyRatePercentage(RATE)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
       it("should revert try to update model factory with non-authorized account", async () => {
         await expect(
           royaltyRegistry.connect(bob).changeModelFactory(AddressZero)
