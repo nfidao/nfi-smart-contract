@@ -102,6 +102,20 @@ describe("ModelNFT", () => {
       );
     });
 
+    it("royalty info should return correct value after changed", async () => {
+      const saleAmount = RATE;
+      await royaltyRegistry.setRoyaltyRateForCollection(
+        modelNFT.address,
+        RATE,
+        bob.address
+      );
+      const royaltyInfo = await modelNFT.royaltyInfo(0, saleAmount);
+      expect(royaltyInfo[0]).to.equal(bob.address);
+      expect(royaltyInfo[1].toString()).to.equal(
+        saleAmount.mul(RATE).div(royaltyFeeDenominator)
+      );
+    });
+
     it("base uri should be empty", async () => {
       expect(await modelNFT.baseURI()).to.equal("");
     });
