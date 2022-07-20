@@ -72,7 +72,7 @@ describe("ModelNFTFactory", async () => {
           designer.address,
           manager.address,
           signer.address,
-          royaltyRegistry.address,
+          royaltyReceiver.address,
           RATE,
           MODEL_LIMIT
         );
@@ -92,7 +92,7 @@ describe("ModelNFTFactory", async () => {
           designer.address,
           manager.address,
           signer.address,
-          royaltyRegistry.address,
+          royaltyReceiver.address,
           0,
           MODEL_LIMIT
         );
@@ -159,11 +159,17 @@ describe("ModelNFTFactory", async () => {
               designer.address,
               manager.address,
               signer.address,
-              royaltyRegistry.address,
+              royaltyReceiver.address,
               RATE,
               0
             )
         ).to.been.revertedWith("Invalid mint limit");
+      });
+
+      it("should revert if try to set royalty registry to zero address", async () => {
+        await expect(
+          modelNFTFactory.changeFactoryRoyaltyRegistry(AddressZero)
+        ).to.been.revertedWith("Invalid address");
       });
 
       it("should revert if model id is exist already", async () => {
@@ -175,7 +181,7 @@ describe("ModelNFTFactory", async () => {
             designer.address,
             manager.address,
             signer.address,
-            royaltyRegistry.address,
+            royaltyReceiver.address,
             RATE,
             MODEL_LIMIT
           );
@@ -188,7 +194,7 @@ describe("ModelNFTFactory", async () => {
               designer.address,
               manager.address,
               signer.address,
-              royaltyRegistry.address,
+              royaltyReceiver.address,
               RATE,
               MODEL_LIMIT
             )

@@ -26,6 +26,7 @@ contract RoyaltyRegistry is RoyaltyStorage {
      *
      */
     function initialize(address _receiver, uint96 _defaultRateRoyaltyPercentage) external initializer {
+        require(_receiver != address(0), "Invalid address");
         receiver = _receiver;
         defaultRoyaltyRatePercentage = _defaultRateRoyaltyPercentage;
         __Ownable_init_unchained();
@@ -82,14 +83,16 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @param _tokens array of token address.
      * @param _royaltyRates array of royalty rates.
      */
-    function setRoyaltyRateForCollections(address[] calldata _tokens, uint96[] calldata _royaltyRates)
-        external
-        onlyOwner
-    {
-        require(_tokens.length == _royaltyRates.length, "Mismatch arguments length");
+    function setRoyaltyRateForCollections(
+        address[] calldata _tokens,
+        uint96[] calldata _royaltyRates,
+        address[] calldata _royaltyReceivers
+    ) external onlyOwner {
+        require(_tokens.length == _royaltyRates.length, "Mismatch royaltyRates length");
+        require(_tokens.length == _royaltyReceivers.length, "Mismatch royaltyReceivers length");
 
         for (uint256 i = 0; i < _tokens.length; i++) {
-            _setRoyaltyForCollection(_tokens[i], _royaltyRates[i]);
+            _setRoyaltyForCollection(_tokens[i], _royaltyRates[i], _royaltyReceivers[i]);
         }
     }
 
@@ -101,8 +104,12 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @param _token token address.
      * @param _royaltyRate royalty rate.
      */
-    function setRoyaltyRateForCollection(address _token, uint96 _royaltyRate) external onlyOwnerOrFactory {
-        _setRoyaltyForCollection(_token, _royaltyRate);
+    function setRoyaltyRateForCollection(
+        address _token,
+        uint96 _royaltyRate,
+        address _royaltyReceiver
+    ) external onlyOwnerOrFactory {
+        _setRoyaltyForCollection(_token, _royaltyRate, _royaltyReceiver);
     }
 
     /**
@@ -111,11 +118,20 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @param _token token / collection address.
      * @param _royaltyRate royalty rate for that particular collection.
      */
-    function _setRoyaltyForCollection(address _token, uint96 _royaltyRate) private {
+    function _setRoyaltyForCollection(
+        address _token,
+        uint96 _royaltyRate,
+        address _royaltyReceiver
+    ) private {
         require(_token != address(0), "Invalid token");
+        require(_royaltyReceiver != address(0), "Invalid receiver address");
         require(_royaltyRate <= MAX_RATE_ROYALTY, "Invalid Rate");
 
-        RoyaltySet memory _royaltySet = RoyaltySet({ isSet: true, royaltyRateForCollection: _royaltyRate });
+        RoyaltySet memory _royaltySet = RoyaltySet({
+            isSet: true,
+            royaltyRateForCollection: _royaltyRate,
+            royaltyReceiver: _royaltyReceiver
+        });
 
         royaltiesSet[_token] = _royaltySet;
 
@@ -133,6 +149,9 @@ contract RoyaltyRegistry is RoyaltyStorage {
      */
     function getRoyaltyInfo(address _token) external view returns (address _receiver, uint96 _royaltyRatePercentage) {
         RoyaltySet memory _royaltySet = royaltiesSet[_token];
-        return (receiver, _royaltySet.isSet ? _royaltySet.royaltyRateForCollection : defaultRoyaltyRatePercentage);
+        return (
+            _royaltySet.royaltyReceiver != address(0) ? _royaltySet.royaltyReceiver : receiver,
+            _royaltySet.isSet ? _royaltySet.royaltyRateForCollection : defaultRoyaltyRatePercentage
+        );
     }
 }
