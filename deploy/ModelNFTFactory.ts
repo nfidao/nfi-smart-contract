@@ -2,7 +2,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { ModelNFTFactory } from "../typechain";
 
 const func: DeployFunction = async ({
-  deployments: { deploy},
+  deployments: { deploy },
   getNamedAccounts,
   network,
 }) => {
@@ -13,7 +13,10 @@ const func: DeployFunction = async ({
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: { name: "RoyaltyRegistryProxyAdmin", artifact: "ObjxProxyAdmin" },
+      viaAdminContract: {
+        name: "RoyaltyRegistryProxyAdmin",
+        artifact: "ObjxProxyAdmin",
+      },
       execute: {
         init: {
           methodName: "initialize",
