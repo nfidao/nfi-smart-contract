@@ -7,6 +7,7 @@ contract RoyaltyStorage is OwnableUpgradeable {
     struct RoyaltySet {
         bool isSet;
         uint96 royaltyRateForCollection;
+        address royaltyReceiver;
     }
 
     /// @dev storing royalty amount percentages for particular collection.

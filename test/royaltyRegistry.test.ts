@@ -84,6 +84,18 @@ describe("ModelNFTFactory", async () => {
           royaltyRegistry.initialize(royaltyReceiver.address, RATE)
         ).to.be.revertedWith("Initializable: contract is already initialized");
       });
+
+      it("should revert if tried to initialize zero address receiver", async () => {
+        await expect(
+          upgrades.deployProxy(
+            await getContractFactory("RoyaltyRegistry", deployer),
+            [AddressZero, RATE],
+            {
+              initializer: "initialize",
+            }
+          )
+        ).to.be.revertedWith("Invalid address");
+      });
     });
   });
 
@@ -193,7 +205,8 @@ describe("ModelNFTFactory", async () => {
       const NEW_RATE = BigNumber.from(200);
       const tx = await royaltyRegistry.setRoyaltyRateForCollections(
         [mockModel.address],
-        [NEW_RATE]
+        [NEW_RATE],
+        [royaltyReceiver.address]
       );
 
       await expect(tx)
@@ -241,7 +254,8 @@ describe("ModelNFTFactory", async () => {
       const NEW_RATE = BigNumber.from(0);
       const tx = await royaltyRegistry.setRoyaltyRateForCollections(
         [mockModel.address],
-        [NEW_RATE]
+        [NEW_RATE],
+        [royaltyReceiver.address]
       );
 
       await expect(tx)
@@ -292,7 +306,8 @@ describe("ModelNFTFactory", async () => {
 
       const tx = await royaltyRegistry.setRoyaltyRateForCollections(
         [mockModel.address, mockModel2.address],
-        [NEW_RATE, NEW_RATE2]
+        [NEW_RATE, NEW_RATE2],
+        [royaltyReceiver.address, royaltyReceiver.address]
       );
 
       await expect(tx)
@@ -318,12 +333,29 @@ describe("ModelNFTFactory", async () => {
       await expect(rate).to.equal(NEW_RATE2);
     });
 
-    it("royalty info should return correct receiver after update", async () => {
+    it("royalty info should return correct receiver after default receiver updated", async () => {
       const NEW_RATE = BigNumber.from(200);
       await royaltyRegistry.changeReceiver(bob.address);
       await royaltyRegistry.setRoyaltyRateForCollections(
         [mockModel.address],
-        [NEW_RATE]
+        [NEW_RATE],
+        [royaltyReceiver.address]
+      );
+
+      const [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
+        mockModel.address
+      );
+
+      await expect(receiver).to.equal(royaltyReceiver.address);
+      await expect(rate).to.equal(NEW_RATE);
+    });
+
+    it("royalty info should return correct receiver after royalty receiver updated", async () => {
+      const NEW_RATE = BigNumber.from(200);
+      await royaltyRegistry.setRoyaltyRateForCollections(
+        [mockModel.address],
+        [NEW_RATE],
+        [bob.address]
       );
 
       const [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
@@ -334,20 +366,61 @@ describe("ModelNFTFactory", async () => {
       await expect(rate).to.equal(NEW_RATE);
     });
 
+    it("royalty info should return default receiver for zero receiver address", async () => {
+      const NEW_RATE = BigNumber.from(200);
+      await royaltyRegistry.setRoyaltyRateForCollections(
+        [mockModel.address],
+        [NEW_RATE],
+        [bob.address]
+      );
+
+      const [receiver, rate] = await royaltyRegistry.getRoyaltyInfo(
+        bob.address
+      );
+
+      await expect(receiver).to.equal(royaltyReceiver.address);
+      await expect(rate).to.equal(RATE);
+    });
+
     describe("revert", () => {
       it("should revert if tokens length mismatch with the rate length", async () => {
         await expect(
           royaltyRegistry.setRoyaltyRateForCollections(
             [mockModel.address],
-            [RATE, RATE]
+            [RATE, RATE],
+            [royaltyReceiver.address]
           )
-        ).to.be.revertedWith("Mismatch arguments length");
+        ).to.be.revertedWith("Mismatch royaltyRates length");
+      });
+
+      it("should revert if tokens length mismatch with the receiver length", async () => {
+        await expect(
+          royaltyRegistry.setRoyaltyRateForCollections(
+            [mockModel.address],
+            [RATE],
+            [royaltyReceiver.address, royaltyReceiver.address]
+          )
+        ).to.be.revertedWith("Mismatch royaltyReceivers length");
       });
 
       it("should revert if try to set royalty for zero address", async () => {
         await expect(
-          royaltyRegistry.setRoyaltyRateForCollections([AddressZero], [RATE])
+          royaltyRegistry.setRoyaltyRateForCollections(
+            [AddressZero],
+            [RATE],
+            [royaltyReceiver.address]
+          )
         ).to.be.revertedWith("Invalid token");
+      });
+
+      it("should revert if try to set royalty receiver with zero address", async () => {
+        await expect(
+          royaltyRegistry.setRoyaltyRateForCollections(
+            [mockModel.address],
+            [RATE],
+            [AddressZero]
+          )
+        ).to.be.revertedWith("Invalid receiver address");
       });
 
       it("should revert if try to set royalty rate greater than the limit", async () => {
@@ -355,7 +428,8 @@ describe("ModelNFTFactory", async () => {
         await expect(
           royaltyRegistry.setRoyaltyRateForCollections(
             [mockModel.address],
-            [MAX_RATE.add(1)]
+            [MAX_RATE.add(1)],
+            [royaltyReceiver.address]
           )
         ).to.be.revertedWith("Invalid Rate");
       });
@@ -364,7 +438,11 @@ describe("ModelNFTFactory", async () => {
         await expect(
           royaltyRegistry
             .connect(bob)
-            .setRoyaltyRateForCollection(mockModel.address, RATE)
+            .setRoyaltyRateForCollection(
+              mockModel.address,
+              RATE,
+              royaltyReceiver.address
+            )
         ).to.be.revertedWith("Unauthorized");
       });
     });
