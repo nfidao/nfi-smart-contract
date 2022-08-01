@@ -15,6 +15,7 @@ describe("ModelNFTFactory", async () => {
   let designer: SignerWithAddress;
   let manager: SignerWithAddress;
   let signer: SignerWithAddress;
+  let owner: SignerWithAddress;
   let bob: SignerWithAddress;
   let royaltyReceiver: SignerWithAddress;
   let royaltyRegistry: RoyaltyRegistry;
@@ -26,7 +27,7 @@ describe("ModelNFTFactory", async () => {
   const RATE = BigNumber.from(100);
 
   const fixture = async (): Promise<[ModelNFTFactory, RoyaltyRegistry]> => {
-    [deployer, designer, manager, signer, royaltyReceiver, bob] =
+    [deployer, designer, manager, signer, owner, royaltyReceiver, bob] =
       await ethers.getSigners();
 
     const RoyaltyRegistry = await getContractFactory(
@@ -69,6 +70,7 @@ describe("ModelNFTFactory", async () => {
         .createModelNFT(
           MODEL_NAME,
           MODEL_ID,
+          owner.address,
           designer.address,
           manager.address,
           signer.address,
@@ -83,12 +85,48 @@ describe("ModelNFTFactory", async () => {
         .withArgs(MODEL_ID, modelNFTAddress);
     });
 
+    it("should set the correct owner", async () => {
+      await modelNFTFactory
+        .connect(bob)
+        .createModelNFT(
+          MODEL_NAME,
+          MODEL_ID,
+          owner.address,
+          designer.address,
+          manager.address,
+          signer.address,
+          royaltyReceiver.address,
+          RATE,
+          MODEL_LIMIT
+        );
+
+      const modelNFTAddress = await modelNFTFactory.modelNFTs(MODEL_ID);
+      const ModelNFT = await getContractFactory("ModelNFT");
+      const modelNFT = await ModelNFT.attach(modelNFTAddress);
+      expect(await modelNFT.owner()).to.equal(owner.address);
+
+      // should not be able to change owner by owner address itself
+      await expect(modelNFT.transferOwnership(bob.address)).to.be.revertedWith(
+        "Unauthorized"
+      );
+
+      // should not be able to change owner with 0 address
+      await expect(
+        modelNFT.connect(manager).transferOwnership(AddressZero)
+      ).to.be.revertedWith("New owner is the zero address");
+
+      // should be able to change owner by manager address
+      await modelNFT.connect(manager).transferOwnership(bob.address);
+      expect(await modelNFT.owner()).to.equal(bob.address);
+    });
+
     it("should be able to create modelNFT with 0 royalty rate", async () => {
       const tx = await modelNFTFactory
         .connect(bob)
         .createModelNFT(
           MODEL_NAME,
           MODEL_ID,
+          owner.address,
           designer.address,
           manager.address,
           signer.address,
@@ -156,6 +194,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              owner.address,
               designer.address,
               manager.address,
               signer.address,
@@ -178,6 +217,7 @@ describe("ModelNFTFactory", async () => {
           .createModelNFT(
             MODEL_NAME,
             MODEL_ID,
+            owner.address,
             designer.address,
             manager.address,
             signer.address,
@@ -191,6 +231,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              owner.address,
               designer.address,
               manager.address,
               signer.address,

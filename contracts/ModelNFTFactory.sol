@@ -55,6 +55,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
     function createModelNFT(
         string memory _modelName,
         string memory _modelID,
+        address _modelOwner,
         address _designer,
         address _manager,
         address _signer,
@@ -64,11 +65,13 @@ contract ModelNFTFactory is OwnableUpgradeable {
     ) external {
         require(_mintLimit > 0, "Invalid mint limit");
         require(modelNFTs[_modelID] == address(0), "Model ID has been used");
+        require(_modelOwner != address(0), "Invalid owner address");
 
         _modelNFT = new ModelNFT(
             _modelName,
             _modelID,
             _mintLimit,
+            _modelOwner,
             _designer,
             _manager,
             _signer,
