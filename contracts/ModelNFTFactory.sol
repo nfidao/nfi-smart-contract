@@ -23,7 +23,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
      *
      * @param _royaltyRegistry royalty registry address.
      */
-    function initialize(address _royaltyRegistry) public initializer {
+    function initialize(address _royaltyRegistry) external initializer {
         require(_royaltyRegistry != address(0), "Invalid royalty address");
         factoryRoyaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
         __Ownable_init_unchained();
