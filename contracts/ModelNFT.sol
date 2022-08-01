@@ -4,11 +4,12 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
-contract ModelNFT is ERC2981, ERC721A {
+contract ModelNFT is ERC2981, ERC721A, Ownable {
     using ECDSA for bytes32;
 
     /// @notice max limit of minting.
@@ -66,6 +67,7 @@ contract ModelNFT is ERC2981, ERC721A {
         string memory _name,
         string memory _symbol,
         uint256 _limit,
+        address _owner,
         address _designer,
         address _manager,
         address _authorizedSignerAddress,
@@ -74,6 +76,7 @@ contract ModelNFT is ERC2981, ERC721A {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
         require(_authorizedSignerAddress != address(0), "Invalid signer address");
 
+        _transferOwnership(_owner);
         mintLimit = _limit;
         designer = _designer;
         manager = _manager;
@@ -265,5 +268,14 @@ contract ModelNFT is ERC2981, ERC721A {
      */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
         tokenURIs[_tokenId] = _tokenURI;
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public override onlyManager {
+        require(newOwner != address(0), "New owner is the zero address");
+        _transferOwnership(newOwner);
     }
 }
