@@ -205,6 +205,96 @@ describe("ModelNFTFactory", async () => {
         ).to.been.revertedWith("Invalid mint limit");
       });
 
+      it("should revert if owner address is zero", async () => {
+        await expect(
+          modelNFTFactory
+            .connect(bob)
+            .createModelNFT(
+              MODEL_NAME,
+              MODEL_ID,
+              AddressZero,
+              designer.address,
+              manager.address,
+              signer.address,
+              royaltyReceiver.address,
+              RATE,
+              MODEL_LIMIT
+            )
+        ).to.been.revertedWith("Invalid owner address");
+      });
+
+      it("should revert if designer address is zero", async () => {
+        await expect(
+          modelNFTFactory
+            .connect(bob)
+            .createModelNFT(
+              MODEL_NAME,
+              MODEL_ID,
+              owner.address,
+              AddressZero,
+              manager.address,
+              signer.address,
+              royaltyReceiver.address,
+              RATE,
+              MODEL_LIMIT
+            )
+        ).to.been.revertedWith("Invalid designer address");
+      });
+
+      it("should revert if owner manager is zero", async () => {
+        await expect(
+          modelNFTFactory
+            .connect(bob)
+            .createModelNFT(
+              MODEL_NAME,
+              MODEL_ID,
+              owner.address,
+              designer.address,
+              AddressZero,
+              signer.address,
+              royaltyReceiver.address,
+              RATE,
+              MODEL_LIMIT
+            )
+        ).to.been.revertedWith("Invalid manager address");
+      });
+
+      it("should revert if owner address is zero", async () => {
+        await expect(
+          modelNFTFactory
+            .connect(bob)
+            .createModelNFT(
+              MODEL_NAME,
+              MODEL_ID,
+              owner.address,
+              designer.address,
+              manager.address,
+              AddressZero,
+              royaltyReceiver.address,
+              RATE,
+              MODEL_LIMIT
+            )
+        ).to.been.revertedWith("Invalid signer address");
+      });
+
+      it("should revert if owner address is zero", async () => {
+        await expect(
+          modelNFTFactory
+            .connect(bob)
+            .createModelNFT(
+              MODEL_NAME,
+              MODEL_ID,
+              owner.address,
+              designer.address,
+              manager.address,
+              signer.address,
+              AddressZero,
+              RATE,
+              MODEL_LIMIT
+            )
+        ).to.been.revertedWith("Invalid royalty receiver address");
+      });
+
       it("should revert if try to set royalty registry to zero address", async () => {
         await expect(
           modelNFTFactory.changeFactoryRoyaltyRegistry(AddressZero)
