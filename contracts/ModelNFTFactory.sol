@@ -23,7 +23,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
      *
      * @param _royaltyRegistry royalty registry address.
      */
-    function initialize(address _royaltyRegistry) public initializer {
+    function initialize(address _royaltyRegistry) external initializer {
         require(_royaltyRegistry != address(0), "Invalid royalty address");
         factoryRoyaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
         __Ownable_init_unchained();
@@ -55,6 +55,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
     function createModelNFT(
         string memory _modelName,
         string memory _modelID,
+        address _modelOwner,
         address _designer,
         address _manager,
         address _signer,
@@ -64,20 +65,26 @@ contract ModelNFTFactory is OwnableUpgradeable {
     ) external {
         require(_mintLimit > 0, "Invalid mint limit");
         require(modelNFTs[_modelID] == address(0), "Model ID has been used");
+        require(_modelOwner != address(0), "Invalid owner address");
+        require(_designer != address(0), "Invalid designer address");
+        require(_manager != address(0), "Invalid manager address");
+        require(_signer != address(0), "Invalid signer address");
+        require(_royaltyReceiver != address(0), "Invalid royalty receiver address");
 
         _modelNFT = new ModelNFT(
             _modelName,
             _modelID,
             _mintLimit,
+            _modelOwner,
             _designer,
             _manager,
             _signer,
             address(factoryRoyaltyRegistry)
         );
 
-        factoryRoyaltyRegistry.setRoyaltyRateForCollection(address(_modelNFT), _royaltyRate, _royaltyReceiver);
-
         modelNFTs[_modelID] = address(_modelNFT);
+
+        factoryRoyaltyRegistry.setRoyaltyRateForCollection(address(_modelNFT), _royaltyRate, _royaltyReceiver);
 
         emit NFTCreated(_modelID, address(_modelNFT));
     }

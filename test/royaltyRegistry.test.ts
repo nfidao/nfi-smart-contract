@@ -17,6 +17,7 @@ describe("ModelNFTFactory", async () => {
   let designer: SignerWithAddress;
   let manager: SignerWithAddress;
   let signer: SignerWithAddress;
+  let owner: SignerWithAddress;
   let bob: SignerWithAddress;
   let royaltyReceiver: SignerWithAddress;
   let royaltyRegistry: RoyaltyRegistry;
@@ -28,7 +29,7 @@ describe("ModelNFTFactory", async () => {
   const RATE = BigNumber.from(100);
 
   const fixture = async (): Promise<[RoyaltyRegistry, ModelNFT]> => {
-    [deployer, designer, manager, signer, royaltyReceiver, bob] =
+    [deployer, designer, manager, signer, owner, royaltyReceiver, bob] =
       await ethers.getSigners();
 
     royaltyRegistry = (await upgrades.deployProxy(
@@ -45,6 +46,7 @@ describe("ModelNFTFactory", async () => {
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
+      owner.address,
       designer.address,
       manager.address,
       signer.address,
@@ -298,6 +300,7 @@ describe("ModelNFTFactory", async () => {
         MODEL_NAME,
         MODEL_ID,
         MODEL_LIMIT,
+        owner.address,
         designer.address,
         manager.address,
         signer.address,
