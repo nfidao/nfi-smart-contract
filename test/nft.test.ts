@@ -57,7 +57,13 @@ describe("ModelNFT", () => {
 
     royaltyRegistry = (await RoyaltyRegistry.deploy()) as RoyaltyRegistry;
 
-    await royaltyRegistry.initialize(royaltyReceiver.address, RATE);
+    await royaltyRegistry.initialize(
+      royaltyReceiver.address,
+      RATE,
+      owner.address,
+      manager.address,
+      signer.address
+    );
 
     modelNFT = (await (
       await getContractFactory("ModelNFT", deployer)
@@ -65,10 +71,7 @@ describe("ModelNFT", () => {
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
-      owner.address,
       designer.address,
-      manager.address,
-      signer.address,
       royaltyRegistry.address
     )) as ModelNFT;
 
@@ -89,6 +92,7 @@ describe("ModelNFT", () => {
       expect(await modelNFT.mintLimit()).to.equal(MODEL_LIMIT);
       expect(await modelNFT.designer()).to.equal(designer.address);
       expect(await modelNFT.manager()).to.equal(manager.address);
+      expect(await modelNFT.owner()).to.equal(owner.address);
       expect(await modelNFT.authorizedSignerAddress()).to.equal(signer.address);
       expect(await modelNFT.royaltyRegistry()).to.equal(
         royaltyRegistry.address
@@ -155,29 +159,10 @@ describe("ModelNFT", () => {
             MODEL_NAME,
             MODEL_ID,
             MODEL_LIMIT,
-            owner.address,
             designer.address,
-            manager.address,
-            signer.address,
             deployer.address /** non-contract address for royalty registry */
           )
         ).to.be.revertedWith("Invalid royalty registry address");
-      });
-
-      it("should revert for zero signer address", async () => {
-        const ModelNFT = await getContractFactory("ModelNFT", deployer);
-        await expect(
-          ModelNFT.deploy(
-            MODEL_NAME,
-            MODEL_ID,
-            MODEL_LIMIT,
-            owner.address,
-            designer.address,
-            manager.address,
-            AddressZero /** Zero signer address */,
-            royaltyRegistry.address
-          )
-        ).to.be.revertedWith("Invalid signer address");
       });
 
       it("token uri should revert since token does not exist", async () => {
@@ -208,26 +193,40 @@ describe("ModelNFT", () => {
         .withArgs(designer.address, bob.address);
     });
 
-    it("change manager address", async () => {
+    it("change collection manager address", async () => {
       expect(await modelNFT.manager()).to.equal(manager.address);
-      const tx = await modelNFT.connect(manager).setManager(bob.address);
+      const tx = await royaltyRegistry
+        .connect(deployer)
+        .changeCollectionManager(bob.address);
       expect(await modelNFT.manager()).to.equal(bob.address);
 
       await expect(tx)
-        .to.emit(modelNFT, "ManagerUpdated")
+        .to.emit(royaltyRegistry, "CollectionManagerUpdated")
         .withArgs(manager.address, bob.address);
     });
 
-    it("change signer address", async () => {
+    it("change collection signer address", async () => {
       expect(await modelNFT.authorizedSignerAddress()).to.equal(signer.address);
-      const tx = await modelNFT
-        .connect(manager)
-        .changeAuthorizedSignerAddress(bob.address);
+      const tx = await royaltyRegistry
+        .connect(deployer)
+        .changeCollectionAuthorizedSignerAddress(bob.address);
       expect(await modelNFT.authorizedSignerAddress()).to.equal(bob.address);
 
       await expect(tx)
-        .to.emit(modelNFT, "AuthorizedSignerAddressUpdated")
-        .withArgs(manager.address, signer.address, bob.address);
+        .to.emit(royaltyRegistry, "CollectionAuthorizedSignerAddressUpdated")
+        .withArgs(signer.address, bob.address);
+    });
+
+    it("change collection owner address", async () => {
+      expect(await modelNFT.authorizedSignerAddress()).to.equal(signer.address);
+      const tx = await royaltyRegistry
+        .connect(deployer)
+        .changeCollectionOwner(bob.address);
+      expect(await modelNFT.owner()).to.equal(bob.address);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "CollectionOwnerUpdated")
+        .withArgs(owner.address, bob.address);
     });
 
     it("change royalty registry address", async () => {
@@ -253,22 +252,6 @@ describe("ModelNFT", () => {
         ); /** try to send tx from manager account */
       });
 
-      it("should revert if set manager from non-manager account", async () => {
-        await expect(
-          modelNFT.connect(designer).setManager(bob.address)
-        ).to.be.revertedWith(
-          "Unauthorized"
-        ); /** try to send tx from designer account */
-      });
-
-      it("should revert if set signer from non-manager account", async () => {
-        await expect(
-          modelNFT.connect(designer).changeAuthorizedSignerAddress(bob.address)
-        ).to.be.revertedWith(
-          "Unauthorized"
-        ); /** try to send tx from designer account */
-      });
-
       it("should revert if set royalty registry from non-manager account", async () => {
         await expect(
           modelNFT.connect(designer).changeRoyaltyRegistry(bob.address)
@@ -283,15 +266,23 @@ describe("ModelNFT", () => {
         ).to.be.revertedWith("Invalid address");
       });
 
-      it("should revert if try to set manager with zero address", async () => {
+      it("should revert if try to set collection manager with zero address", async () => {
         await expect(
-          modelNFT.connect(manager).setManager(AddressZero)
+          royaltyRegistry.connect(deployer).changeCollectionManager(AddressZero)
         ).to.be.revertedWith("Invalid address");
       });
 
-      it("should revert if try to set signer with zero address", async () => {
+      it("should revert if try to set collection signer with zero address", async () => {
         await expect(
-          modelNFT.connect(manager).changeAuthorizedSignerAddress(AddressZero)
+          royaltyRegistry
+            .connect(deployer)
+            .changeCollectionAuthorizedSignerAddress(AddressZero)
+        ).to.be.revertedWith("Invalid address");
+      });
+
+      it("should revert if try to set collection owner with zero address", async () => {
+        await expect(
+          royaltyRegistry.connect(deployer).changeCollectionOwner(AddressZero)
         ).to.be.revertedWith("Invalid address");
       });
 
@@ -432,10 +423,7 @@ describe("ModelNFT", () => {
           MODEL_NAME,
           MODEL_ID,
           1,
-          owner.address,
           designer.address,
-          manager.address,
-          signer.address,
           royaltyRegistry.address
         );
       });

@@ -13,6 +13,12 @@ contract RoyaltyRegistry is RoyaltyStorage {
 
     event DefaultRoyaltyRatePercentageUpdated(uint96 oldRate, uint96 newRate);
 
+    event CollectionManagerUpdated(address indexed _oldAddress, address _newAddress);
+
+    event CollectionAuthorizedSignerAddressUpdated(address indexed _oldAddress, address _newAddress);
+
+    event CollectionOwnerUpdated(address indexed _oldAddress, address _newAddress);
+
     modifier onlyOwnerOrFactory() {
         require(msg.sender == owner() || msg.sender == modelFactory, "Unauthorized");
         _;
@@ -25,10 +31,25 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @param _defaultRateRoyaltyPercentage default royalty percentage.
      *
      */
-    function initialize(address _receiver, uint96 _defaultRateRoyaltyPercentage) external initializer {
-        require(_receiver != address(0), "Invalid address");
+    function initialize(
+        address _receiver,
+        uint96 _defaultRateRoyaltyPercentage,
+        address _collectionOwner,
+        address _collectionManager,
+        address _collectionAuthorizedSignerAddress
+    ) external initializer {
+        require(_receiver != address(0), "Invalid receiver address");
+        require(_collectionOwner != address(0), "Invalid owner address");
+        require(_collectionManager != address(0), "Invalid manager address");
+        require(_collectionAuthorizedSignerAddress != address(0), "Invalid signer address");
+
+
         receiver = _receiver;
         defaultRoyaltyRatePercentage = _defaultRateRoyaltyPercentage;
+        collectionOwner = _collectionOwner;
+        collectionManager = _collectionManager;
+        collectionAuthorizedSignerAddress = _collectionAuthorizedSignerAddress;
+
         __Ownable_init_unchained();
     }
 
@@ -153,5 +174,44 @@ contract RoyaltyRegistry is RoyaltyStorage {
             _royaltySet.royaltyReceiver != address(0) ? _royaltySet.royaltyReceiver : receiver,
             _royaltySet.isSet ? _royaltySet.royaltyRateForCollection : defaultRoyaltyRatePercentage
         );
+    }
+
+
+    /**
+     * @dev Update the authorized signer address.
+     *
+     * @param _collectionSignerAddress new authorized signer address.
+     */
+    function changeCollectionAuthorizedSignerAddress(address _collectionSignerAddress) external onlyOwner {
+        require(_collectionSignerAddress != address(0), "Invalid address");
+        address oldSignerAddress = collectionAuthorizedSignerAddress;
+        collectionAuthorizedSignerAddress = _collectionSignerAddress;
+        emit CollectionAuthorizedSignerAddressUpdated(oldSignerAddress, collectionAuthorizedSignerAddress);
+    }
+
+    /**
+     * @notice Setter for manager address.
+     * @dev Can be called only by the current manager.
+     *
+     * @param _collectionManager new manager address.
+     */
+    function changeCollectionManager(address _collectionManager) external onlyOwner {
+        require(_collectionManager != address(0), "Invalid address");
+        address oldManagerAddress = collectionManager;
+        collectionManager = _collectionManager;
+
+        emit CollectionManagerUpdated(oldManagerAddress, collectionManager);
+    }
+
+    /**
+     * @dev Update the authorized signer address.
+     *
+     * @param _collectionOwner new authorized signer address.
+     */
+    function changeCollectionOwner(address _collectionOwner) external onlyOwner {
+        require(_collectionOwner != address(0), "Invalid address");
+        address oldOwner = collectionOwner;
+        collectionOwner = _collectionOwner;
+        emit CollectionOwnerUpdated(oldOwner, collectionOwner);
     }
 }

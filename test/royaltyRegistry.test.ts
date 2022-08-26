@@ -34,7 +34,13 @@ describe("ModelNFTFactory", async () => {
 
     royaltyRegistry = (await upgrades.deployProxy(
       await getContractFactory("RoyaltyRegistry", deployer),
-      [royaltyReceiver.address, RATE],
+      [
+        royaltyReceiver.address,
+        RATE,
+        owner.address,
+        manager.address,
+        signer.address,
+      ],
       {
         initializer: "initialize",
       }
@@ -46,10 +52,7 @@ describe("ModelNFTFactory", async () => {
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
-      owner.address,
       designer.address,
-      manager.address,
-      signer.address,
       royaltyRegistry.address
     )) as ModelNFT;
 
@@ -83,7 +86,13 @@ describe("ModelNFTFactory", async () => {
     describe("revert", () => {
       it("should revert if tried to re-initialize", async () => {
         await expect(
-          royaltyRegistry.initialize(royaltyReceiver.address, RATE)
+          royaltyRegistry.initialize(
+            royaltyReceiver.address,
+            RATE,
+            owner.address,
+            manager.address,
+            signer.address
+          )
         ).to.be.revertedWith("Initializable: contract is already initialized");
       });
 
@@ -91,12 +100,48 @@ describe("ModelNFTFactory", async () => {
         await expect(
           upgrades.deployProxy(
             await getContractFactory("RoyaltyRegistry", deployer),
-            [AddressZero, RATE],
+            [AddressZero, RATE, owner.address, manager.address, signer.address],
             {
               initializer: "initialize",
             }
           )
-        ).to.be.revertedWith("Invalid address");
+        ).to.be.revertedWith("Invalid receiver address");
+      });
+
+      it("should revert if tried to initialize zero address collection owner", async () => {
+        await expect(
+          upgrades.deployProxy(
+            await getContractFactory("RoyaltyRegistry", deployer),
+            [bob.address, RATE, AddressZero, bob.address, bob.address],
+            {
+              initializer: "initialize",
+            }
+          )
+        ).to.be.revertedWith("Invalid owner address");
+      });
+
+      it("should revert if tried to initialize zero address collection manager", async () => {
+        await expect(
+          upgrades.deployProxy(
+            await getContractFactory("RoyaltyRegistry", deployer),
+            [bob.address, RATE, bob.address, AddressZero, bob.address],
+            {
+              initializer: "initialize",
+            }
+          )
+        ).to.be.revertedWith("Invalid manager address");
+      });
+
+      it("should revert if tried to initialize zero address collection signer", async () => {
+        await expect(
+          upgrades.deployProxy(
+            await getContractFactory("RoyaltyRegistry", deployer),
+            [bob.address, RATE, bob.address, bob.address, AddressZero],
+            {
+              initializer: "initialize",
+            }
+          )
+        ).to.be.revertedWith("Invalid signer address");
       });
     });
   });
@@ -110,6 +155,40 @@ describe("ModelNFTFactory", async () => {
         .withArgs(royaltyReceiver.address, bob.address);
 
       expect(await royaltyRegistry.receiver()).to.equal(bob.address);
+    });
+
+    it("update collection owner", async () => {
+      const tx = await royaltyRegistry.changeCollectionOwner(bob.address);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "CollectionOwnerUpdated")
+        .withArgs(owner.address, bob.address);
+
+      expect(await royaltyRegistry.collectionOwner()).to.equal(bob.address);
+    });
+
+    it("update collection manager", async () => {
+      const tx = await royaltyRegistry.changeCollectionManager(bob.address);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "CollectionManagerUpdated")
+        .withArgs(manager.address, bob.address);
+
+      expect(await royaltyRegistry.collectionManager()).to.equal(bob.address);
+    });
+
+    it("update collection authorized signer", async () => {
+      const tx = await royaltyRegistry.changeCollectionAuthorizedSignerAddress(
+        bob.address
+      );
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "CollectionAuthorizedSignerAddressUpdated")
+        .withArgs(signer.address, bob.address);
+
+      expect(
+        await royaltyRegistry.collectionAuthorizedSignerAddress()
+      ).to.equal(bob.address);
     });
 
     it("update default royalty rate", async () => {
@@ -175,6 +254,26 @@ describe("ModelNFTFactory", async () => {
       it("should revert try to update receiver with non-authorized account", async () => {
         await expect(
           royaltyRegistry.connect(bob).changeReceiver(bob.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update collection owner with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeCollectionOwner(bob.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update collection manager with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeCollectionManager(bob.address)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update collection signer with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry
+            .connect(bob)
+            .changeCollectionAuthorizedSignerAddress(bob.address)
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
 
@@ -300,10 +399,7 @@ describe("ModelNFTFactory", async () => {
         MODEL_NAME,
         MODEL_ID,
         MODEL_LIMIT,
-        owner.address,
         designer.address,
-        manager.address,
-        signer.address,
         royaltyRegistry.address
       )) as ModelNFT;
 

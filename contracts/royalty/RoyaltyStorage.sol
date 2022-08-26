@@ -23,4 +23,13 @@ contract RoyaltyStorage is OwnableUpgradeable {
     address public modelFactory;
 
     uint96 public constant MAX_RATE_ROYALTY = 1000;
+
+    /// @notice the authorized address who can change some configuration of collections.
+    address public collectionManager;
+
+    /// @dev authorized address who can sign the arbitrary data to allow minting for collections.
+    address public collectionAuthorizedSignerAddress;
+
+    /// @dev owner for collections.
+    address public collectionOwner;
 }

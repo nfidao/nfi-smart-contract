@@ -46,8 +46,6 @@ contract ModelNFTFactory is OwnableUpgradeable {
      * @param _modelName name of model.
      * @param _modelID ID of model.
      * @param _designer Address of designer.
-     * @param _manager Address of manager.
-     * @param _signer Address of signer for minting.
      * @param _royaltyReceiver Address of royalty receiver.
      * @param _royaltyRate royalty Rate
      * @param _mintLimit upper limit of minting.
@@ -55,30 +53,21 @@ contract ModelNFTFactory is OwnableUpgradeable {
     function createModelNFT(
         string memory _modelName,
         string memory _modelID,
-        address _modelOwner,
         address _designer,
-        address _manager,
-        address _signer,
         address _royaltyReceiver,
         uint96 _royaltyRate,
         uint256 _mintLimit
     ) external {
         require(_mintLimit > 0, "Invalid mint limit");
         require(modelNFTs[_modelID] == address(0), "Model ID has been used");
-        require(_modelOwner != address(0), "Invalid owner address");
         require(_designer != address(0), "Invalid designer address");
-        require(_manager != address(0), "Invalid manager address");
-        require(_signer != address(0), "Invalid signer address");
         require(_royaltyReceiver != address(0), "Invalid royalty receiver address");
 
         _modelNFT = new ModelNFT(
             _modelName,
             _modelID,
             _mintLimit,
-            _modelOwner,
             _designer,
-            _manager,
-            _signer,
             address(factoryRoyaltyRegistry)
         );
 
