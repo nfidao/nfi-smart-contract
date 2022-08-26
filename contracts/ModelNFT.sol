@@ -9,7 +9,7 @@ import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
-contract ModelNFT is ERC2981, ERC721A, Ownable {
+contract ModelNFT is ERC2981, ERC721A {
     using ECDSA for bytes32;
 
     /// @notice max limit of minting.
@@ -21,12 +21,6 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
     /// @notice the attached designer address to this collection.
     address public designer;
 
-    /// @notice the authorized address who can change some configuration.
-    address public manager;
-
-    /// @dev authorized address who can sign the arbitrary data to allow minting.
-    address public authorizedSignerAddress;
-
     /// @dev royalty registry address that store the royalty info.
     IRoyaltyRegistry public royaltyRegistry;
 
@@ -36,11 +30,9 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
     /// @dev dedicated to store the token URI if base URI is not defined.
     mapping(uint256 => string) public tokenURIs;
 
-    event AuthorizedSignerAddressUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
     event DesignerUpdated(address indexed _oldAddress, address _newAddress);
-    event ManagerUpdated(address indexed _oldAddress, address _newAddress);
 
     modifier onlyDesigner() {
         require(msg.sender == designer, "Unauthorized");
@@ -48,8 +40,23 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
     }
 
     modifier onlyManager() {
-        require(msg.sender == manager, "Unauthorized");
+        require(msg.sender == manager(), "Unauthorized");
         _;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return royaltyRegistry.collectionOwner();
+    }
+
+    function manager() public view returns (address) {
+        return royaltyRegistry.collectionManager();
+    }
+
+    function authorizedSignerAddress() public view returns (address) {
+        return royaltyRegistry.collectionAuthorizedSignerAddress();
     }
 
     /**
@@ -59,28 +66,19 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
      * @param _symbol token Symbol.
      * @param _limit max mint limit.
      * @param _designer designer address.
-     * @param _manager manager address.
-     * @param _authorizedSignerAddress signer address.
      * @param _royaltyRegistry royalty receiver address.
      */
     constructor(
         string memory _name,
         string memory _symbol,
         uint256 _limit,
-        address _owner,
         address _designer,
-        address _manager,
-        address _authorizedSignerAddress,
         address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
-        require(_authorizedSignerAddress != address(0), "Invalid signer address");
 
-        _transferOwnership(_owner);
         mintLimit = _limit;
         designer = _designer;
-        manager = _manager;
-        authorizedSignerAddress = _authorizedSignerAddress;
         royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
     }
 
@@ -157,18 +155,6 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
     }
 
     /**
-     * @dev Update the authorized signer address.
-     *
-     * @param _signerAddress new authorized signer address.
-     */
-    function changeAuthorizedSignerAddress(address _signerAddress) external onlyManager {
-        require(_signerAddress != address(0), "Invalid address");
-        address oldSignerAddress = authorizedSignerAddress;
-        authorizedSignerAddress = _signerAddress;
-        emit AuthorizedSignerAddressUpdated(msg.sender, oldSignerAddress, authorizedSignerAddress);
-    }
-
-    /**
      * @dev Update the royalty registry address.
      *
      * @param _royaltyRegistry new royalty registry address.
@@ -229,20 +215,6 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
     }
 
     /**
-     * @notice Setter for manager address.
-     * @dev Can be called only by the current manager.
-     *
-     * @param _manager new manager address.
-     */
-    function setManager(address _manager) external onlyManager {
-        require(_manager != address(0), "Invalid address");
-        address oldManagerAddress = manager;
-        manager = _manager;
-
-        emit ManagerUpdated(oldManagerAddress, manager);
-    }
-
-    /**
      * @dev Verify hashed data.
      * @param _hash Hashed data bundle
      * @param _signature Signature to check hash against
@@ -250,7 +222,7 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
      */
     function _isValidSignature(bytes32 _hash, bytes memory _signature) internal view returns (bool) {
         bytes32 signedHash = _hash.toEthSignedMessageHash();
-        return signedHash.recover(_signature) == authorizedSignerAddress;
+        return signedHash.recover(_signature) == authorizedSignerAddress();
     }
 
     /**
@@ -268,14 +240,5 @@ contract ModelNFT is ERC2981, ERC721A, Ownable {
      */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
         tokenURIs[_tokenId] = _tokenURI;
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public override onlyManager {
-        require(newOwner != address(0), "New owner is the zero address");
-        _transferOwnership(newOwner);
     }
 }

@@ -9,4 +9,10 @@ interface IRoyaltyRegistry {
         uint96 _royaltyRate,
         address _royaltyReceiver
     ) external;
+
+    function collectionManager() external view returns(address);
+
+    function collectionAuthorizedSignerAddress() external view returns(address);
+
+    function collectionOwner() external view returns(address);
 }
