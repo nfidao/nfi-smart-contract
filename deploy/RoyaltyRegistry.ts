@@ -8,6 +8,9 @@ const func: DeployFunction = async ({
 }) => {
   const { deployer } = await getNamedAccounts();
   const receiver = deployer;
+  const collectionOwner = deployer;
+  const collectionManager = deployer;
+  const collectionAuthorizedSignerAddress = deployer;
   const defaultRate = 100;
 
   await deploy("RoyaltyRegistry", {
@@ -21,15 +24,27 @@ const func: DeployFunction = async ({
       execute: {
         init: {
           methodName: "initialize",
-          args: [receiver, defaultRate],
+          args: [
+            receiver,
+            defaultRate,
+            collectionOwner,
+            collectionManager,
+            collectionAuthorizedSignerAddress,
+          ],
         },
       },
     },
     from: deployer,
     log: true,
   });
+
+  await deploy("RoyaltyRegistryImpl", {
+    from: deployer,
+    log: true,
+    contract: "RoyaltyRegistry",
+  });
 };
 
-func.tags = ["RoyaltyRegistry"];
+func.tags = ["RoyaltyRegistry", "RoyaltyRegistryImpl"];
 
 export default func;
