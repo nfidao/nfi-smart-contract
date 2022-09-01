@@ -32,4 +32,7 @@ contract RoyaltyStorage is OwnableUpgradeable {
 
     /// @dev owner for collections.
     address public collectionOwner;
+
+    /// @dev custom metadata to be used for opensea
+    string public baseContractURI;
 }
