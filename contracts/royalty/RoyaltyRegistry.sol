@@ -19,6 +19,8 @@ contract RoyaltyRegistry is RoyaltyStorage {
 
     event CollectionOwnerUpdated(address indexed _oldAddress, address _newAddress);
 
+    event BaseContractURIUpdated(string oldBaseContractURI, string newBaseContractURI);
+
     modifier onlyOwnerOrFactory() {
         require(msg.sender == owner() || msg.sender == modelFactory, "Unauthorized");
         _;
@@ -213,5 +215,25 @@ contract RoyaltyRegistry is RoyaltyStorage {
         address oldOwner = collectionOwner;
         collectionOwner = _collectionOwner;
         emit CollectionOwnerUpdated(oldOwner, collectionOwner);
+    }
+
+    /**
+     * @dev Update baseContractURI.
+     *
+     * @param _baseContractURI new base contract URI.
+     */
+    function changeContractURI(string memory _baseContractURI) external onlyOwner {
+        string memory oldBaseContractURI = baseContractURI;
+        baseContractURI = _baseContractURI;
+        emit BaseContractURIUpdated(oldBaseContractURI, baseContractURI);
+    }
+
+    /**
+     * @dev full contract URI based on collection contract.
+     *
+     * @return string of full contract uri.
+     */
+    function getContractURIForToken() external view returns(string memory) {
+        return string(abi.encodePacked(baseContractURI, msg.sender));
     }
 }

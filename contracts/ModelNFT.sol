@@ -59,6 +59,10 @@ contract ModelNFT is ERC2981, ERC721A {
         return royaltyRegistry.collectionAuthorizedSignerAddress();
     }
 
+    function contractURI() public view returns (string memory) {
+        return royaltyRegistry.getContractURIForToken();
+    }
+
     /**
      * @dev _rate is put in the 4th position to optimize the gas limit, as in its slot will be packed to the _designer address'
      *

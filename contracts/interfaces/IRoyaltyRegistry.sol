@@ -15,4 +15,6 @@ interface IRoyaltyRegistry {
     function collectionAuthorizedSignerAddress() external view returns(address);
 
     function collectionOwner() external view returns(address);
+
+    function getContractURIForToken() external view returns(string calldata);
 }
