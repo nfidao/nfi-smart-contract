@@ -2,6 +2,7 @@
 pragma solidity 0.8.4;
 
 import "./RoyaltyStorage.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RoyaltyRegistry is RoyaltyStorage {
     /// @dev emitted when royalties set for token.
@@ -234,6 +235,6 @@ contract RoyaltyRegistry is RoyaltyStorage {
      * @return string of full contract uri.
      */
     function getContractURIForToken() external view returns(string memory) {
-        return string(abi.encodePacked(baseContractURI, msg.sender));
+        return string(abi.encodePacked(baseContractURI, Strings.toHexString(msg.sender) ));
     }
 }
