@@ -5,12 +5,14 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
 contract ModelNFT is ERC2981, ERC721A {
     using ECDSA for bytes32;
+    using SafeERC20 for IERC20;
 
     /// @notice max limit of minting.
     uint256 public mintLimit;
@@ -30,9 +32,17 @@ contract ModelNFT is ERC2981, ERC721A {
     /// @dev dedicated to store the token URI if base URI is not defined.
     mapping(uint256 => string) public tokenURIs;
 
+    /// @dev minting price.
+    uint256 public tokenPrice;
+
+    /// @dev token use for minting.
+    IERC20 public tokenPayment;
+
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
     event DesignerUpdated(address indexed _oldAddress, address _newAddress);
+    event TokenPaymentUpdated(address indexed _newAddress);
+    event TokenPriceUpdated(uint256 indexed _newTokenPrice);
 
     modifier onlyDesigner() {
         require(msg.sender == designer, "Unauthorized");
@@ -76,11 +86,15 @@ contract ModelNFT is ERC2981, ERC721A {
         string memory _name,
         string memory _symbol,
         uint256 _limit,
+        uint256 _tokenPrice,
+        address _tokenPayment,
         address _designer,
         address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
 
+        tokenPrice = _tokenPrice;
+        tokenPayment = IERC20(_tokenPayment);
         mintLimit = _limit;
         designer = _designer;
         royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
@@ -181,13 +195,33 @@ contract ModelNFT is ERC2981, ERC721A {
         address _to,
         string memory _uri,
         bytes calldata _signature
-    ) external {
+    ) external payable {
         require(!isAddressMinted[msg.sender], "Address has been used");
 
         require(
             _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, address(this))), _signature),
             "Invalid signature"
         );
+
+        address _paymentReceiver = royaltyRegistry.collectionManager();
+
+        if (address(tokenPayment) == address(0)) {
+            require(
+                msg.value == tokenPrice,
+                "Invalid eth for purchasing"
+            );
+
+            (bool succeed,) = _paymentReceiver.call{value: msg.value}("");
+            require(succeed, "Failed to forward Ether");
+        } else {
+            require(msg.value == 0, "ETH_NOT_ALLOWED");
+
+            tokenPayment.safeTransferFrom(
+                msg.sender,
+                _paymentReceiver,
+                tokenPrice
+            );
+        }
 
         uint256 _totalSupply = totalSupply();
 
@@ -216,6 +250,26 @@ contract ModelNFT is ERC2981, ERC721A {
         designer = _designer;
 
         emit DesignerUpdated(oldDesignerAddress, designer);
+    }
+
+    /**
+     * @notice Setter for token payment that is used for minting.
+     *
+     * @param _newTokenPayment new token payment address
+     */
+    function setTokenPayment(address _newTokenPayment) external onlyManager {
+        tokenPayment = IERC20(_newTokenPayment);
+        emit TokenPaymentUpdated(_newTokenPayment);
+    }
+
+    /**
+     * @notice Setter for token price for minting.
+     *
+     * @param _newTokenPrice new token price.
+     */
+    function setTokenPrice(uint256 _newTokenPrice) external onlyManager {
+        tokenPrice = _newTokenPrice;
+        emit TokenPriceUpdated(_newTokenPrice);
     }
 
     /**
