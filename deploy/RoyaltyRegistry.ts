@@ -37,14 +37,8 @@ const func: DeployFunction = async ({
     from: deployer,
     log: true,
   });
-
-  await deploy("RoyaltyRegistryImpl", {
-    from: deployer,
-    log: true,
-    contract: "RoyaltyRegistry",
-  });
 };
 
-func.tags = ["RoyaltyRegistry", "RoyaltyRegistryImpl"];
+func.tags = ["RoyaltyRegistry"];
 
 export default func;
