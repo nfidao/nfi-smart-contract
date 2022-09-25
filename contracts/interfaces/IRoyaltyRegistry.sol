@@ -10,11 +10,11 @@ interface IRoyaltyRegistry {
         address _royaltyReceiver
     ) external;
 
-    function collectionManager() external view returns(address);
+    function collectionManager() external view returns (address);
 
-    function collectionAuthorizedSignerAddress() external view returns(address);
+    function collectionAuthorizedSignerAddress() external view returns (address);
 
-    function collectionOwner() external view returns(address);
+    function collectionOwner() external view returns (address);
 
-    function getContractURIForToken() external view returns(string calldata);
+    function getContractURIForToken() external view returns (string calldata);
 }

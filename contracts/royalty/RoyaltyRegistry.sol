@@ -46,7 +46,6 @@ contract RoyaltyRegistry is RoyaltyStorage {
         require(_collectionManager != address(0), "Invalid manager address");
         require(_collectionAuthorizedSignerAddress != address(0), "Invalid signer address");
 
-
         receiver = _receiver;
         defaultRoyaltyRatePercentage = _defaultRateRoyaltyPercentage;
         collectionOwner = _collectionOwner;
@@ -179,7 +178,6 @@ contract RoyaltyRegistry is RoyaltyStorage {
         );
     }
 
-
     /**
      * @dev Update the authorized signer address.
      *
@@ -234,7 +232,7 @@ contract RoyaltyRegistry is RoyaltyStorage {
      *
      * @return string of full contract uri.
      */
-    function getContractURIForToken() external view returns(string memory) {
-        return string(abi.encodePacked(baseContractURI, Strings.toHexString(msg.sender) ));
+    function getContractURIForToken() external view returns (string memory) {
+        return string(abi.encodePacked(baseContractURI, Strings.toHexString(msg.sender)));
     }
 }

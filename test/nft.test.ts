@@ -81,7 +81,7 @@ describe("ModelNFT", () => {
       royaltyRegistry.address
     )) as ModelNFT;
 
-    const totalSupply = ethers.utils.parseEther("2000000")
+    const totalSupply = ethers.utils.parseEther("2000000");
     const MockERC20 = await getContractFactory("MockERC20", deployer);
     mockPaymentToken = (await MockERC20.deploy(totalSupply)) as MockERC20;
 
@@ -468,7 +468,8 @@ describe("ModelNFT", () => {
         const uri = "https://1";
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
-        await expect(modelNFT
+        await expect(
+          modelNFT
             .connect(bob)
             .mint(nftReceiver, uri, signature, { value: newPrice.mul(2) })
         ).to.be.revertedWith("Invalid eth for purchasing"); // invalid eth as payment
@@ -483,7 +484,8 @@ describe("ModelNFT", () => {
         const NewManager = await getContractFactory("MockManager", deployer);
         const newManager = await NewManager.deploy();
 
-        await expect(deployer.sendTransaction({
+        await expect(
+          deployer.sendTransaction({
             to: newManager.address,
             value: newPrice,
           })
@@ -499,7 +501,7 @@ describe("ModelNFT", () => {
     });
 
     context("with eth as payment", async () => {
-      it("should return correct token payment & price", async() => {
+      it("should return correct token payment & price", async () => {
         const [tokenPayment, tokenPrice] = await Promise.all([
           modelNFT.tokenPayment(),
           modelNFT.tokenPrice(),
@@ -556,7 +558,7 @@ describe("ModelNFT", () => {
         await mockPaymentToken.transfer(bob.address, supply);
 
         const uri = "https://1";
-        const nftReceiver = sarah.address;  
+        const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
 
         await expect(
@@ -589,7 +591,7 @@ describe("ModelNFT", () => {
     });
 
     context("with token as payment", async () => {
-      it("should return correct token payment & price", async() => {
+      it("should return correct token payment & price", async () => {
         const newPrice = ethers.utils.parseEther("1");
         await modelNFT.connect(manager).setTokenPrice(newPrice);
         await modelNFT

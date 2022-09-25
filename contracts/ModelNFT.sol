@@ -206,21 +206,14 @@ contract ModelNFT is ERC2981, ERC721A {
         address _paymentReceiver = royaltyRegistry.collectionManager();
 
         if (address(tokenPayment) == address(0)) {
-            require(
-                msg.value == tokenPrice,
-                "Invalid eth for purchasing"
-            );
+            require(msg.value == tokenPrice, "Invalid eth for purchasing");
 
-            (bool succeed,) = _paymentReceiver.call{value: msg.value}("");
+            (bool succeed, ) = _paymentReceiver.call{ value: msg.value }("");
             require(succeed, "Failed to forward Ether");
         } else {
             require(msg.value == 0, "ETH_NOT_ALLOWED");
 
-            tokenPayment.safeTransferFrom(
-                msg.sender,
-                _paymentReceiver,
-                tokenPrice
-            );
+            tokenPayment.safeTransferFrom(msg.sender, _paymentReceiver, tokenPrice);
         }
 
         uint256 _totalSupply = totalSupply();
