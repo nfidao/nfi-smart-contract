@@ -27,6 +27,8 @@ describe("ModelNFTFactory", async () => {
   const MODEL_ID = "ID";
   const MODEL_LIMIT = BigNumber.from(100);
   const RATE = BigNumber.from(100);
+  const TOKEN_PAYMENT = AddressZero;
+  const TOKEN_PRICE = BigNumber.from(0);
 
   const fixture = async (): Promise<[RoyaltyRegistry, ModelNFT]> => {
     [deployer, designer, manager, signer, owner, royaltyReceiver, bob] =
@@ -52,6 +54,8 @@ describe("ModelNFTFactory", async () => {
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
+      TOKEN_PRICE,
+      TOKEN_PAYMENT,
       designer.address,
       royaltyRegistry.address
     )) as ModelNFT;
@@ -399,6 +403,8 @@ describe("ModelNFTFactory", async () => {
         MODEL_NAME,
         MODEL_ID,
         MODEL_LIMIT,
+        TOKEN_PRICE,
+        TOKEN_PAYMENT,
         designer.address,
         royaltyRegistry.address
       )) as ModelNFT;
