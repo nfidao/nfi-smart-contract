@@ -1,7 +1,7 @@
 module.exports = [
-  "TEST04",
-  "TEST04",
+  "ai(愛)-phone",
+  "NFI-149",
   1000,
-  "0x9af703BDDf6b166B64846599F56b68ada1323b2a",
-  "0x456371c0becd61e9f337c166f9b9db4ac0c25255",
+  "0xAc489908277a47af58c62A2e85D401B5a134e5fF",
+  "0xC6eA8da563A0eC2CD2A0deEe3dcaB51632b2CCd3",
 ];
