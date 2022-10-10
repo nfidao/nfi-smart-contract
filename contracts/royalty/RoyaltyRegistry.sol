@@ -2,6 +2,7 @@
 pragma solidity 0.8.4;
 
 import "./RoyaltyStorage.sol";
+import "../interfaces/IFormula.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract RoyaltyRegistry is RoyaltyStorage {
@@ -21,6 +22,8 @@ contract RoyaltyRegistry is RoyaltyStorage {
     event CollectionOwnerUpdated(address indexed _oldAddress, address _newAddress);
 
     event BaseContractURIUpdated(string oldBaseContractURI, string newBaseContractURI);
+
+    event NFTFormulaUpdated(address indexed _oldAddress, address _newAddress);
 
     modifier onlyOwnerOrFactory() {
         require(msg.sender == owner() || msg.sender == modelFactory, "Unauthorized");
@@ -81,6 +84,19 @@ contract RoyaltyRegistry is RoyaltyStorage {
         modelFactory = _newModelFactory;
 
         emit ModelFactoryUpdated(oldModelFactory, modelFactory);
+    }
+
+    /**
+     * @dev setter for nft formula address.
+     *
+     * @param _newNftFormula new address of nft formula
+     */
+    function changeNFTFormula(address _newNftFormula) external onlyOwner {
+        require(_newNftFormula != address(0), "Invalid nft formula address");
+        address oldNftFormula = nftFormula;
+        nftFormula = _newNftFormula;
+
+        emit NFTFormulaUpdated(oldNftFormula, nftFormula);
     }
 
     /**
@@ -234,5 +250,16 @@ contract RoyaltyRegistry is RoyaltyStorage {
      */
     function getContractURIForToken() external view returns (string memory) {
         return string(abi.encodePacked(baseContractURI, Strings.toHexString(msg.sender)));
+    }
+
+    /**
+     * @dev get token price of collection address
+     *
+     * @param _formulaType the formula type
+     *
+     * @return _price of the collection address based on formula type
+     */
+    function getTokenPrice(uint256 _formulaType) external view returns (uint256 _price) {
+        return IFormula(nftFormula).getTokenPrice(_formulaType, msg.sender);
     }
 }

@@ -32,17 +32,12 @@ contract ModelNFT is ERC2981, ERC721A {
     /// @dev dedicated to store the token URI if base URI is not defined.
     mapping(uint256 => string) public tokenURIs;
 
-    /// @dev minting price.
-    uint256 public tokenPrice;
-
     /// @dev token use for minting.
     IERC20 public tokenPayment;
 
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
     event DesignerUpdated(address indexed _oldAddress, address _newAddress);
-    event TokenPaymentUpdated(address indexed _newAddress);
-    event TokenPriceUpdated(uint256 indexed _newTokenPrice);
 
     modifier onlyDesigner() {
         require(msg.sender == designer, "Unauthorized");
@@ -86,14 +81,12 @@ contract ModelNFT is ERC2981, ERC721A {
         string memory _name,
         string memory _symbol,
         uint256 _limit,
-        uint256 _tokenPrice,
         address _tokenPayment,
         address _designer,
         address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
 
-        tokenPrice = _tokenPrice;
         tokenPayment = IERC20(_tokenPayment);
         mintLimit = _limit;
         designer = _designer;
@@ -194,26 +187,28 @@ contract ModelNFT is ERC2981, ERC721A {
     function mint(
         address _to,
         string memory _uri,
+        uint256 _formulaType,
         bytes calldata _signature
     ) external payable {
         require(!isAddressMinted[msg.sender], "Address has been used");
 
         require(
-            _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, address(this))), _signature),
+            _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, _formulaType, address(this))), _signature),
             "Invalid signature"
         );
 
         address _paymentReceiver = royaltyRegistry.collectionManager();
+        uint256 _tokenPrice = tokenPrice(_formulaType);
 
         if (address(tokenPayment) == address(0)) {
-            require(msg.value == tokenPrice, "Invalid eth for purchasing");
+            require(msg.value == _tokenPrice, "Invalid eth for purchasing");
 
             (bool succeed, ) = _paymentReceiver.call{ value: msg.value }("");
             require(succeed, "Failed to forward Ether");
         } else {
             require(msg.value == 0, "ETH_NOT_ALLOWED");
 
-            tokenPayment.safeTransferFrom(msg.sender, _paymentReceiver, tokenPrice);
+            tokenPayment.safeTransferFrom(msg.sender, _paymentReceiver, _tokenPrice);
         }
 
         uint256 _totalSupply = totalSupply();
@@ -246,26 +241,6 @@ contract ModelNFT is ERC2981, ERC721A {
     }
 
     /**
-     * @notice Setter for token payment that is used for minting.
-     *
-     * @param _newTokenPayment new token payment address
-     */
-    function setTokenPayment(address _newTokenPayment) external onlyManager {
-        tokenPayment = IERC20(_newTokenPayment);
-        emit TokenPaymentUpdated(_newTokenPayment);
-    }
-
-    /**
-     * @notice Setter for token price for minting.
-     *
-     * @param _newTokenPrice new token price.
-     */
-    function setTokenPrice(uint256 _newTokenPrice) external onlyManager {
-        tokenPrice = _newTokenPrice;
-        emit TokenPriceUpdated(_newTokenPrice);
-    }
-
-    /**
      * @dev Verify hashed data.
      * @param _hash Hashed data bundle
      * @param _signature Signature to check hash against
@@ -291,5 +266,16 @@ contract ModelNFT is ERC2981, ERC721A {
      */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
         tokenURIs[_tokenId] = _tokenURI;
+    }
+
+    /**
+     * @dev get token price minting of the NFT based on formula type
+     *
+     * @param _formulaType formula type
+     *
+     * @return _price price of the NFT for minting
+     */
+    function tokenPrice(uint256 _formulaType) public view returns (uint256 _price) {
+        return royaltyRegistry.getTokenPrice(_formulaType);
     }
 }

@@ -35,4 +35,7 @@ contract RoyaltyStorage is OwnableUpgradeable {
 
     /// @dev custom metadata to be used for opensea
     string public baseContractURI;
+
+    /// @dev address for NFT formula to get the price
+    address public nftFormula;
 }

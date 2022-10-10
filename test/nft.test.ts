@@ -2,8 +2,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, waffle } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
-import type { ModelNFT, RoyaltyRegistry, MockERC20 } from "../typechain";
+import type {
+  MockModelNFT,
+  RoyaltyRegistry,
+  MockERC20,
+  NFTPriceFormula,
+  // eslint-disable-next-line node/no-missing-import
+} from "../typechain";
 
 const provider = waffle.provider;
 const {
@@ -13,15 +18,19 @@ const {
 
 const royaltyFeeDenominator = BigNumber.from(10000);
 
+const formulaType = 1;
+
 const getMintSignature = async function (
   signerAccount: SignerWithAddress,
-  nftContract: ModelNFT,
+  nftContract: MockModelNFT,
   senderAccount: SignerWithAddress,
-  uri: string
+  uri: string,
+  formulaType?: number | undefined
 ) {
+  if (!formulaType) formulaType = 1;
   const messageDigest = ethers.utils.solidityKeccak256(
-    ["address", "string", "address"],
-    [senderAccount.address, uri, nftContract.address]
+    ["address", "string", "uint256", "address"],
+    [senderAccount.address, uri, formulaType, nftContract.address]
   );
   const signature = await signerAccount.signMessage(
     ethers.utils.arrayify(messageDigest)
@@ -39,9 +48,10 @@ describe("ModelNFT", () => {
   let royaltyReceiver: SignerWithAddress;
   let bob: SignerWithAddress;
   let sarah: SignerWithAddress;
-  let modelNFT: ModelNFT;
+  let modelNFT: MockModelNFT;
   let royaltyRegistry: RoyaltyRegistry;
   let mockPaymentToken: MockERC20;
+  let nftFormula: NFTPriceFormula;
 
   const MODEL_NAME = "TEST";
   const MODEL_ID = "ID";
@@ -50,10 +60,20 @@ describe("ModelNFT", () => {
   const TOKEN_PAYMENT = AddressZero;
   const TOKEN_PRICE = BigNumber.from(0);
 
-  const fixture = async (): Promise<[ModelNFT, RoyaltyRegistry]> => {
+  const fixture = async (): Promise<[MockModelNFT, RoyaltyRegistry]> => {
     [deployer, designer, manager, signer, owner, royaltyReceiver, bob, sarah] =
       await ethers.getSigners();
 
+    /** NFT FORMULA */
+    const NFTFormula = await getContractFactory("NFTPriceFormula", deployer);
+
+    nftFormula = (await NFTFormula.deploy()) as NFTPriceFormula;
+
+    await nftFormula.initialize();
+
+    await nftFormula.setFormulaPrices(1, TOKEN_PRICE);
+
+    /** ROYALTY REGISTRY */
     const RoyaltyRegistry = await getContractFactory(
       "RoyaltyRegistry",
       deployer
@@ -69,17 +89,18 @@ describe("ModelNFT", () => {
       signer.address
     );
 
+    await royaltyRegistry.changeNFTFormula(nftFormula.address);
+
     modelNFT = (await (
-      await getContractFactory("ModelNFT", deployer)
+      await getContractFactory("MockModelNFT", deployer)
     ).deploy(
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
-      TOKEN_PRICE,
       TOKEN_PAYMENT,
       designer.address,
       royaltyRegistry.address
-    )) as ModelNFT;
+    )) as MockModelNFT;
 
     const totalSupply = ethers.utils.parseEther("2000000");
     const MockERC20 = await getContractFactory("MockERC20", deployer);
@@ -172,7 +193,6 @@ describe("ModelNFT", () => {
             MODEL_NAME,
             MODEL_ID,
             MODEL_LIMIT,
-            TOKEN_PRICE,
             TOKEN_PAYMENT,
             designer.address,
             deployer.address /** non-contract address for royalty registry */
@@ -318,7 +338,9 @@ describe("ModelNFT", () => {
       const uri = "https://1";
       const nftReceiver = sarah.address;
       const signature = await getMintSignature(signer, modelNFT, bob, uri);
-      await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+      await modelNFT
+        .connect(bob)
+        .mint(nftReceiver, uri, formulaType, signature);
 
       expect(await modelNFT.totalSupply()).to.equal(1);
       expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);
@@ -330,7 +352,9 @@ describe("ModelNFT", () => {
       const uri = "";
       const nftReceiver = sarah.address;
       const signature = await getMintSignature(signer, modelNFT, bob, uri);
-      await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+      await modelNFT
+        .connect(bob)
+        .mint(nftReceiver, uri, formulaType, signature);
 
       expect(await modelNFT.totalSupply()).to.equal(1);
       expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);
@@ -346,7 +370,9 @@ describe("ModelNFT", () => {
       const uri = "1";
       const nftReceiver = sarah.address;
       const signature = await getMintSignature(signer, modelNFT, bob, uri);
-      await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+      await modelNFT
+        .connect(bob)
+        .mint(nftReceiver, uri, formulaType, signature);
 
       expect(await modelNFT.totalSupply()).to.equal(1);
       expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);
@@ -362,7 +388,9 @@ describe("ModelNFT", () => {
       const uri = "";
       const nftReceiver = sarah.address;
       const signature = await getMintSignature(signer, modelNFT, bob, uri);
-      await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+      await modelNFT
+        .connect(bob)
+        .mint(nftReceiver, uri, formulaType, signature);
 
       expect(await modelNFT.totalSupply()).to.equal(1);
       expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);
@@ -380,7 +408,9 @@ describe("ModelNFT", () => {
         uri = `https://${i}`;
         sender = accounts[i];
         signature = await getMintSignature(signer, modelNFT, sender, uri);
-        tx = await modelNFT.connect(sender).mint(nftReceiver, uri, signature);
+        tx = await modelNFT
+          .connect(sender)
+          .mint(nftReceiver, uri, formulaType, signature);
         expect(await modelNFT.totalSupply()).to.equal(i + 1);
         expect(await modelNFT.balanceOf(sarah.address)).to.equal(i + 1);
         expect(await modelNFT.ownerOf(i)).to.equal(sarah.address);
@@ -400,7 +430,7 @@ describe("ModelNFT", () => {
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, sarah, uri);
         await expect(
-          modelNFT.connect(bob).mint(nftReceiver, uri, signature)
+          modelNFT.connect(bob).mint(nftReceiver, uri, formulaType, signature)
         ).to.be.revertedWith("Invalid signature");
       });
 
@@ -413,14 +443,18 @@ describe("ModelNFT", () => {
           uri = `https://${i}`;
           signature = await getMintSignature(signer, modelNFT, bob, uri);
           if (i === 0) {
-            await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+            await modelNFT
+              .connect(bob)
+              .mint(nftReceiver, uri, formulaType, signature);
             expect(await modelNFT.totalSupply()).to.equal(i + 1);
             expect(await modelNFT.balanceOf(sarah.address)).to.equal(i + 1);
             expect(await modelNFT.ownerOf(i)).to.equal(sarah.address);
             expect(await modelNFT.tokenURI(i)).to.equal(uri);
           } else {
             await expect(
-              modelNFT.connect(bob).mint(nftReceiver, uri, signature)
+              modelNFT
+                .connect(bob)
+                .mint(nftReceiver, uri, formulaType, signature)
             ).to.be.revertedWith("Address has been used");
           }
         }
@@ -433,12 +467,11 @@ describe("ModelNFT", () => {
 
     describe("revert mint limit reached", () => {
       beforeEach(async () => {
-        const ModelNFT = await getContractFactory("ModelNFT", deployer);
+        const ModelNFT = await getContractFactory("MockModelNFT", deployer);
         modelNFT = await ModelNFT.deploy(
           MODEL_NAME,
           MODEL_ID,
           1,
-          TOKEN_PRICE,
           TOKEN_PAYMENT,
           designer.address,
           royaltyRegistry.address
@@ -450,11 +483,15 @@ describe("ModelNFT", () => {
         const uri2 = "https://2";
         const nftReceiver = sarah.address;
         let signature = await getMintSignature(signer, modelNFT, bob, uri1);
-        await modelNFT.connect(bob).mint(nftReceiver, uri1, signature);
+        await modelNFT
+          .connect(bob)
+          .mint(nftReceiver, uri1, formulaType, signature);
 
         signature = await getMintSignature(signer, modelNFT, sarah, uri2);
         await expect(
-          modelNFT.connect(sarah).mint(nftReceiver, uri2, signature)
+          modelNFT
+            .connect(sarah)
+            .mint(nftReceiver, uri2, formulaType, signature)
         ).to.be.revertedWith("Maximum limit has been reached");
       });
     });
@@ -464,20 +501,20 @@ describe("ModelNFT", () => {
     context("with eth as payment should revert", async () => {
       it("if eth amount is not valid", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         const uri = "https://1";
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
         await expect(
-          modelNFT
-            .connect(bob)
-            .mint(nftReceiver, uri, signature, { value: newPrice.mul(2) })
+          modelNFT.connect(bob).mint(nftReceiver, uri, formulaType, signature, {
+            value: newPrice.mul(2),
+          })
         ).to.be.revertedWith("Invalid eth for purchasing"); // invalid eth as payment
       });
 
       it("if failed to forward eth to manager", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         const uri = "https://1";
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
@@ -495,7 +532,7 @@ describe("ModelNFT", () => {
         await expect(
           modelNFT
             .connect(bob)
-            .mint(nftReceiver, uri, signature, { value: newPrice })
+            .mint(nftReceiver, uri, formulaType, signature, { value: newPrice })
         ).to.be.reverted;
       });
     });
@@ -504,7 +541,7 @@ describe("ModelNFT", () => {
       it("should return correct token payment & price", async () => {
         const [tokenPayment, tokenPrice] = await Promise.all([
           modelNFT.tokenPayment(),
-          modelNFT.tokenPrice(),
+          modelNFT.tokenPrice(formulaType),
         ]);
 
         expect(tokenPayment).to.equal(AddressZero);
@@ -513,7 +550,7 @@ describe("ModelNFT", () => {
 
       it("mint nft with eth ", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         const uri = "https://1";
         const nftReceiver = sarah.address;
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
@@ -525,7 +562,7 @@ describe("ModelNFT", () => {
 
         await modelNFT
           .connect(bob)
-          .mint(nftReceiver, uri, signature, { value: newPrice });
+          .mint(nftReceiver, uri, formulaType, signature, { value: newPrice });
 
         expect(await modelNFT.totalSupply()).to.equal(1);
         expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);
@@ -548,7 +585,7 @@ describe("ModelNFT", () => {
     context("with token as payment should revert", async () => {
       it("if token amount approved insufficient", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         await modelNFT
           .connect(manager)
           .setTokenPayment(mockPaymentToken.address);
@@ -562,13 +599,13 @@ describe("ModelNFT", () => {
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
 
         await expect(
-          modelNFT.connect(bob).mint(nftReceiver, uri, signature)
+          modelNFT.connect(bob).mint(nftReceiver, uri, formulaType, signature)
         ).to.be.revertedWith("ERC20: insufficient allowance");
       });
 
       it("if send eth for erc20 as token payment", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         await modelNFT
           .connect(manager)
           .setTokenPayment(mockPaymentToken.address);
@@ -585,7 +622,9 @@ describe("ModelNFT", () => {
         const signature = await getMintSignature(signer, modelNFT, bob, uri);
 
         await expect(
-          modelNFT.connect(bob).mint(nftReceiver, uri, signature, { value: 1 })
+          modelNFT
+            .connect(bob)
+            .mint(nftReceiver, uri, formulaType, signature, { value: 1 })
         ).to.be.revertedWith("ETH_NOT_ALLOWED");
       });
     });
@@ -593,14 +632,14 @@ describe("ModelNFT", () => {
     context("with token as payment", async () => {
       it("should return correct token payment & price", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         await modelNFT
           .connect(manager)
           .setTokenPayment(mockPaymentToken.address);
 
         const [tokenPayment, tokenPrice] = await Promise.all([
           modelNFT.tokenPayment(),
-          modelNFT.tokenPrice(),
+          modelNFT.tokenPrice(formulaType),
         ]);
 
         expect(tokenPayment).to.equal(mockPaymentToken.address);
@@ -609,7 +648,7 @@ describe("ModelNFT", () => {
 
       it("mint nft with erc20 token ", async () => {
         const newPrice = ethers.utils.parseEther("1");
-        await modelNFT.connect(manager).setTokenPrice(newPrice);
+        await nftFormula.setFormulaPrices(formulaType, newPrice);
         await modelNFT
           .connect(manager)
           .setTokenPayment(mockPaymentToken.address);
@@ -631,7 +670,9 @@ describe("ModelNFT", () => {
           bob.address
         );
 
-        await modelNFT.connect(bob).mint(nftReceiver, uri, signature);
+        await modelNFT
+          .connect(bob)
+          .mint(nftReceiver, uri, formulaType, signature);
 
         expect(await modelNFT.totalSupply()).to.equal(1);
         expect(await modelNFT.ownerOf(0)).to.equal(sarah.address);

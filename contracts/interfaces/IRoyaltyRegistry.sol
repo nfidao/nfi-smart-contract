@@ -17,4 +17,6 @@ interface IRoyaltyRegistry {
     function collectionOwner() external view returns (address);
 
     function getContractURIForToken() external view returns (string calldata);
+
+    function getTokenPrice(uint256 _formulaType) external view returns (uint256 _price);
 }
