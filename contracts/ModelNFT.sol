@@ -26,7 +26,7 @@ contract ModelNFT is ERC2981, ERC721A {
     /// @dev royalty registry address that store the royalty info.
     IRoyaltyRegistry public royaltyRegistry;
 
-    /// @dev dedicated to restrict one time minting per address.
+    /// @dev dedicated to restrict one time minting per address. Need to keep this storage to avoid storage collision
     mapping(address => bool) public isAddressMinted;
 
     /// @dev dedicated to store the token URI if base URI is not defined.
@@ -190,8 +190,6 @@ contract ModelNFT is ERC2981, ERC721A {
         uint256 _formulaType,
         bytes calldata _signature
     ) external payable {
-        require(!isAddressMinted[msg.sender], "Address has been used");
-
         require(
             _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, _formulaType, address(this))), _signature),
             "Invalid signature"
@@ -215,9 +213,6 @@ contract ModelNFT is ERC2981, ERC721A {
 
         // check if minting is possible
         require(_totalSupply < mintLimit, "Maximum limit has been reached");
-
-        // Mark address for minting
-        isAddressMinted[msg.sender] = true;
 
         // mint a token using erc721a
         _safeMint(_to, 1);
