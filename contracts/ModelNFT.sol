@@ -35,6 +35,8 @@ contract ModelNFT is ERC2981, ERC721A {
     /// @dev token use for minting.
     IERC20 public tokenPayment;
 
+    mapping(bytes => bool) usedSignature;
+
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
     event DesignerUpdated(address indexed _oldAddress, address _newAddress);
@@ -46,6 +48,11 @@ contract ModelNFT is ERC2981, ERC721A {
 
     modifier onlyManager() {
         require(msg.sender == manager(), "Unauthorized");
+        _;
+    }
+
+    modifier checkUsedSignature(bytes calldata signature) {
+        require(!usedSignature[signature], "Signature has been used");
         _;
     }
 
@@ -181,22 +188,31 @@ contract ModelNFT is ERC2981, ERC721A {
      * @dev Everybody who has the match salt & signature from signer address, can mint the NFT.
      *
      * @param _to receiver address of minted token.
-     * @param _uri uri that will be associated to the minted token id.
+     * @param _uris uri that will be associated to the minted token id.
+     * @param _formulaType formula type that will be determined the price of nft.
+     * @param _totalMint total mint.
      * @param _signature signature from authorized signer address.
      */
     function mint(
         address _to,
-        string memory _uri,
+        string[] memory _uris,
         uint256 _formulaType,
+        uint256 _totalMint,
         bytes calldata _signature
-    ) external payable {
+    ) external payable checkUsedSignature(_signature) {
+        require(_uris.length == _totalMint, "Mismatch length of token uri");
         require(
-            _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, _formulaType, address(this))), _signature),
+            _isValidSignature(
+                keccak256(abi.encodePacked(msg.sender, _uris[0], _formulaType, _totalMint, address(this))),
+                _signature
+            ),
             "Invalid signature"
         );
 
+        usedSignature[_signature] = true;
+
         address _paymentReceiver = royaltyRegistry.collectionManager();
-        uint256 _tokenPrice = tokenPrice(_formulaType);
+        uint256 _tokenPrice = tokenPrice(_formulaType) * _totalMint;
 
         if (address(tokenPayment) == address(0)) {
             require(msg.value == _tokenPrice, "Invalid eth for purchasing");
@@ -212,13 +228,15 @@ contract ModelNFT is ERC2981, ERC721A {
         uint256 _totalSupply = totalSupply();
 
         // check if minting is possible
-        require(_totalSupply < mintLimit, "Maximum limit has been reached");
+        require(_totalSupply + _totalMint <= mintLimit, "Maximum limit has been reached");
 
         // mint a token using erc721a
-        _safeMint(_to, 1);
+        _safeMint(_to, _totalMint);
 
         // set token uri
-        _setTokenURI(_totalSupply, _uri);
+        for (uint256 i = 0; i < _uris.length; i++) {
+            _setTokenURI(_totalSupply + i, _uris[i]);
+        }
     }
 
     /**
