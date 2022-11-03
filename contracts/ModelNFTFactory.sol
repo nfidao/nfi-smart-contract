@@ -53,6 +53,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
     function createModelNFT(
         string memory _modelName,
         string memory _modelID,
+        address _tokenPayment,
         address _designer,
         address _royaltyReceiver,
         uint96 _royaltyRate,
@@ -67,6 +68,7 @@ contract ModelNFTFactory is OwnableUpgradeable {
             _modelName,
             _modelID,
             _mintLimit,
+            _tokenPayment,
             _designer,
             address(factoryRoyaltyRegistry)
         );

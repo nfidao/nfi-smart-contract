@@ -7,7 +7,7 @@ const func: DeployFunction = async ({
   network,
 }) => {
   const { deployer } = await getNamedAccounts();
-  const royaltyRegistry = "0x3220fF790fb4E6d7Dd2F334D7296759a9646db72";
+  const royaltyRegistry = "0xC6eA8da563A0eC2CD2A0deEe3dcaB51632b2CCd3";
 
   await deploy("ModelNFTFactory", {
     proxy: {

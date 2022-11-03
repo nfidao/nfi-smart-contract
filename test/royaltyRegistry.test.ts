@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, upgrades, waffle } from "hardhat";
 // eslint-disable-next-line node/no-missing-import
-import { ModelNFT, RoyaltyRegistry } from "../typechain";
+import { ModelNFT, NFTPriceFormula, RoyaltyRegistry } from "../typechain";
 
 const {
   constants: { AddressZero },
@@ -22,16 +22,29 @@ describe("ModelNFTFactory", async () => {
   let royaltyReceiver: SignerWithAddress;
   let royaltyRegistry: RoyaltyRegistry;
   let mockModel: ModelNFT;
+  let nftFormula: NFTPriceFormula;
 
   const MODEL_NAME = "TEST";
   const MODEL_ID = "ID";
   const MODEL_LIMIT = BigNumber.from(100);
   const RATE = BigNumber.from(100);
+  const TOKEN_PAYMENT = AddressZero;
+  const TOKEN_PRICE = BigNumber.from(0);
 
   const fixture = async (): Promise<[RoyaltyRegistry, ModelNFT]> => {
     [deployer, designer, manager, signer, owner, royaltyReceiver, bob] =
       await ethers.getSigners();
 
+    /** NFT FORMULA */
+    const NFTFormula = await getContractFactory("NFTPriceFormula", deployer);
+
+    nftFormula = (await NFTFormula.deploy()) as NFTPriceFormula;
+
+    await nftFormula.initialize();
+
+    await nftFormula.setFormulaPrices(1, TOKEN_PRICE);
+
+    /** ROYALTY REGISTRY */
     royaltyRegistry = (await upgrades.deployProxy(
       await getContractFactory("RoyaltyRegistry", deployer),
       [
@@ -46,12 +59,15 @@ describe("ModelNFTFactory", async () => {
       }
     )) as RoyaltyRegistry;
 
+    await royaltyRegistry.changeNFTFormula(nftFormula.address);
+
     mockModel = (await (
       await getContractFactory("ModelNFT", deployer)
     ).deploy(
       MODEL_NAME,
       MODEL_ID,
       MODEL_LIMIT,
+      TOKEN_PAYMENT,
       designer.address,
       royaltyRegistry.address
     )) as ModelNFT;
@@ -216,6 +232,27 @@ describe("ModelNFTFactory", async () => {
       expect(await royaltyRegistry.modelFactory()).to.equal(bob.address);
     });
 
+    it("update contract uri", async () => {
+      const newBaseURI = "test base uri";
+      const tx = await royaltyRegistry.changeContractURI(newBaseURI);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "BaseContractURIUpdated")
+        .withArgs("", newBaseURI);
+
+      expect(await royaltyRegistry.baseContractURI()).to.equal(newBaseURI);
+    });
+
+    it("update nft formula address", async () => {
+      const tx = await royaltyRegistry.changeNFTFormula(bob.address);
+
+      await expect(tx)
+        .to.emit(royaltyRegistry, "NFTFormulaUpdated")
+        .withArgs(nftFormula.address, bob.address);
+
+      expect(await royaltyRegistry.nftFormula()).to.equal(bob.address);
+    });
+
     it("update default royalty rate to the max", async () => {
       const MAX_RATE = await royaltyRegistry.MAX_RATE_ROYALTY();
       const tx = await royaltyRegistry.changeDefaultRoyaltyRatePercentage(
@@ -249,6 +286,12 @@ describe("ModelNFTFactory", async () => {
         await expect(
           royaltyRegistry.changeModelFactory(AddressZero)
         ).to.be.revertedWith("Invalid address");
+      });
+
+      it("should revert try to update nft formula to zero address", async () => {
+        await expect(
+          royaltyRegistry.changeNFTFormula(AddressZero)
+        ).to.be.revertedWith("Invalid nft formula address");
       });
 
       it("should revert try to update receiver with non-authorized account", async () => {
@@ -286,6 +329,18 @@ describe("ModelNFTFactory", async () => {
       it("should revert try to update model factory with non-authorized account", async () => {
         await expect(
           royaltyRegistry.connect(bob).changeModelFactory(AddressZero)
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update contract uri with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeContractURI("test")
+        ).to.be.revertedWith("Ownable: caller is not the owner");
+      });
+
+      it("should revert try to update nft formula with non-authorized account", async () => {
+        await expect(
+          royaltyRegistry.connect(bob).changeNFTFormula(AddressZero)
         ).to.be.revertedWith("Ownable: caller is not the owner");
       });
     });
@@ -399,6 +454,7 @@ describe("ModelNFTFactory", async () => {
         MODEL_NAME,
         MODEL_ID,
         MODEL_LIMIT,
+        TOKEN_PAYMENT,
         designer.address,
         royaltyRegistry.address
       )) as ModelNFT;

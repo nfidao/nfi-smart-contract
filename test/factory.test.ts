@@ -2,8 +2,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers, upgrades, waffle } from "hardhat";
-// eslint-disable-next-line node/no-missing-import
-import { ModelNFTFactory, RoyaltyRegistry } from "../typechain";
+
+import {
+  ModelNFTFactory,
+  NFTPriceFormula,
+  RoyaltyRegistry,
+  // eslint-disable-next-line node/no-missing-import
+} from "../typechain";
 
 const {
   constants: { AddressZero },
@@ -20,16 +25,29 @@ describe("ModelNFTFactory", async () => {
   let royaltyReceiver: SignerWithAddress;
   let royaltyRegistry: RoyaltyRegistry;
   let modelNFTFactory: ModelNFTFactory;
+  let nftFormula: NFTPriceFormula;
 
   const MODEL_NAME = "TEST";
   const MODEL_ID = "ID";
   const MODEL_LIMIT = BigNumber.from(100);
   const RATE = BigNumber.from(100);
+  const TOKEN_PAYMENT = AddressZero;
+  const TOKEN_PRICE = BigNumber.from(0);
 
   const fixture = async (): Promise<[ModelNFTFactory, RoyaltyRegistry]> => {
     [deployer, designer, manager, signer, owner, royaltyReceiver, bob] =
       await ethers.getSigners();
 
+    /** NFT FORMULA */
+    const NFTFormula = await getContractFactory("NFTPriceFormula", deployer);
+
+    nftFormula = (await NFTFormula.deploy()) as NFTPriceFormula;
+
+    await nftFormula.initialize();
+
+    await nftFormula.setFormulaPrices(1, TOKEN_PRICE);
+
+    /** ROYALTY REGISTRY */
     const RoyaltyRegistry = await getContractFactory(
       "RoyaltyRegistry",
       deployer
@@ -44,6 +62,8 @@ describe("ModelNFTFactory", async () => {
       manager.address,
       signer.address
     );
+
+    await royaltyRegistry.changeNFTFormula(nftFormula.address);
 
     modelNFTFactory = (await upgrades.deployProxy(
       await getContractFactory("ModelNFTFactory", deployer),
@@ -76,6 +96,7 @@ describe("ModelNFTFactory", async () => {
         .createModelNFT(
           MODEL_NAME,
           MODEL_ID,
+          TOKEN_PAYMENT,
           designer.address,
           royaltyReceiver.address,
           RATE,
@@ -94,6 +115,7 @@ describe("ModelNFTFactory", async () => {
         .createModelNFT(
           MODEL_NAME,
           MODEL_ID,
+          TOKEN_PAYMENT,
           designer.address,
           royaltyReceiver.address,
           RATE,
@@ -112,6 +134,7 @@ describe("ModelNFTFactory", async () => {
         .createModelNFT(
           MODEL_NAME,
           MODEL_ID,
+          TOKEN_PAYMENT,
           designer.address,
           royaltyReceiver.address,
           0,
@@ -177,6 +200,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              TOKEN_PAYMENT,
               designer.address,
               royaltyReceiver.address,
               RATE,
@@ -192,6 +216,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              TOKEN_PAYMENT,
               AddressZero,
               royaltyReceiver.address,
               RATE,
@@ -207,6 +232,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              TOKEN_PAYMENT,
               designer.address,
               AddressZero,
               RATE,
@@ -227,6 +253,7 @@ describe("ModelNFTFactory", async () => {
           .createModelNFT(
             MODEL_NAME,
             MODEL_ID,
+            TOKEN_PAYMENT,
             designer.address,
             royaltyReceiver.address,
             RATE,
@@ -238,6 +265,7 @@ describe("ModelNFTFactory", async () => {
             .createModelNFT(
               MODEL_NAME,
               MODEL_ID,
+              TOKEN_PAYMENT,
               designer.address,
               royaltyReceiver.address,
               RATE,

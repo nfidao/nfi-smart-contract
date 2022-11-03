@@ -5,12 +5,14 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./interfaces/IRoyaltyRegistry.sol";
 
 // @author DeDe
 contract ModelNFT is ERC2981, ERC721A {
     using ECDSA for bytes32;
+    using SafeERC20 for IERC20;
 
     /// @notice max limit of minting.
     uint256 public mintLimit;
@@ -24,11 +26,16 @@ contract ModelNFT is ERC2981, ERC721A {
     /// @dev royalty registry address that store the royalty info.
     IRoyaltyRegistry public royaltyRegistry;
 
-    /// @dev dedicated to restrict one time minting per address.
+    /// @dev dedicated to restrict one time minting per address. Need to keep this storage to avoid storage collision
     mapping(address => bool) public isAddressMinted;
 
     /// @dev dedicated to store the token URI if base URI is not defined.
     mapping(uint256 => string) public tokenURIs;
+
+    /// @dev token use for minting.
+    IERC20 public tokenPayment;
+
+    mapping(bytes => bool) usedSignature;
 
     event RoyaltyRegistryUpdated(address indexed _sender, address _oldAddress, address _newAddress);
     event BaseUriUpdated(address indexed _sender, string _oldURI, string _newURI);
@@ -41,6 +48,11 @@ contract ModelNFT is ERC2981, ERC721A {
 
     modifier onlyManager() {
         require(msg.sender == manager(), "Unauthorized");
+        _;
+    }
+
+    modifier checkUsedSignature(bytes calldata signature) {
+        require(!usedSignature[signature], "Signature has been used");
         _;
     }
 
@@ -76,11 +88,13 @@ contract ModelNFT is ERC2981, ERC721A {
         string memory _name,
         string memory _symbol,
         uint256 _limit,
+        address _tokenPayment,
         address _designer,
         address _royaltyRegistry
     ) ERC721A(_name, _symbol) {
         require(Address.isContract(_royaltyRegistry), "Invalid royalty registry address");
 
+        tokenPayment = IERC20(_tokenPayment);
         mintLimit = _limit;
         designer = _designer;
         royaltyRegistry = IRoyaltyRegistry(_royaltyRegistry);
@@ -174,34 +188,55 @@ contract ModelNFT is ERC2981, ERC721A {
      * @dev Everybody who has the match salt & signature from signer address, can mint the NFT.
      *
      * @param _to receiver address of minted token.
-     * @param _uri uri that will be associated to the minted token id.
+     * @param _uris uri that will be associated to the minted token id.
+     * @param _formulaType formula type that will be determined the price of nft.
+     * @param _totalMint total mint.
      * @param _signature signature from authorized signer address.
      */
     function mint(
         address _to,
-        string memory _uri,
+        string[] memory _uris,
+        uint256 _formulaType,
+        uint256 _totalMint,
         bytes calldata _signature
-    ) external {
-        require(!isAddressMinted[msg.sender], "Address has been used");
-
+    ) external payable checkUsedSignature(_signature) {
+        require(_uris.length == _totalMint, "Mismatch length of token uri");
         require(
-            _isValidSignature(keccak256(abi.encodePacked(msg.sender, _uri, address(this))), _signature),
+            _isValidSignature(
+                keccak256(abi.encodePacked(msg.sender, _uris[0], _formulaType, _totalMint, address(this))),
+                _signature
+            ),
             "Invalid signature"
         );
+
+        usedSignature[_signature] = true;
+
+        address _paymentReceiver = royaltyRegistry.collectionManager();
+        uint256 _tokenPrice = tokenPrice(_formulaType) * _totalMint;
+
+        if (address(tokenPayment) == address(0)) {
+            require(msg.value == _tokenPrice, "Invalid eth for purchasing");
+
+            (bool succeed, ) = _paymentReceiver.call{ value: msg.value }("");
+            require(succeed, "Failed to forward Ether");
+        } else {
+            require(msg.value == 0, "ETH_NOT_ALLOWED");
+
+            tokenPayment.safeTransferFrom(msg.sender, _paymentReceiver, _tokenPrice);
+        }
 
         uint256 _totalSupply = totalSupply();
 
         // check if minting is possible
-        require(_totalSupply < mintLimit, "Maximum limit has been reached");
-
-        // Mark address for minting
-        isAddressMinted[msg.sender] = true;
+        require(_totalSupply + _totalMint <= mintLimit, "Maximum limit has been reached");
 
         // mint a token using erc721a
-        _safeMint(_to, 1);
+        _safeMint(_to, _totalMint);
 
         // set token uri
-        _setTokenURI(_totalSupply, _uri);
+        for (uint256 i = 0; i < _uris.length; i++) {
+            _setTokenURI(_totalSupply + i, _uris[i]);
+        }
     }
 
     /**
@@ -244,5 +279,16 @@ contract ModelNFT is ERC2981, ERC721A {
      */
     function _setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
         tokenURIs[_tokenId] = _tokenURI;
+    }
+
+    /**
+     * @dev get token price minting of the NFT based on formula type
+     *
+     * @param _formulaType formula type
+     *
+     * @return _price price of the NFT for minting
+     */
+    function tokenPrice(uint256 _formulaType) public view returns (uint256 _price) {
+        return royaltyRegistry.getTokenPrice(_formulaType);
     }
 }

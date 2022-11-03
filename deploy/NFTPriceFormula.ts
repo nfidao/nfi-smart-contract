@@ -1,5 +1,4 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { ModelNFTFactory } from "../typechain";
 
 const func: DeployFunction = async ({
   deployments: { deploy },
@@ -7,9 +6,8 @@ const func: DeployFunction = async ({
   network,
 }) => {
   const { deployer } = await getNamedAccounts();
-  const royaltyRegistry = "0xC6eA8da563A0eC2CD2A0deEe3dcaB51632b2CCd3";
 
-  await deploy("ModelNFTFactory", {
+  await deploy("NFTPriceFormula", {
     proxy: {
       owner: deployer,
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -20,7 +18,7 @@ const func: DeployFunction = async ({
       execute: {
         init: {
           methodName: "initialize",
-          args: [royaltyRegistry],
+          args: [],
         },
       },
     },
@@ -29,6 +27,6 @@ const func: DeployFunction = async ({
   });
 };
 
-func.tags = ["ModelNFTFactory"];
+func.tags = ["NFTPriceFormula"];
 
 export default func;
